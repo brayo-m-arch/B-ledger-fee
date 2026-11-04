@@ -1,0 +1,2810 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ledger Fees</title>
+<meta name="application-name" content="Ledger Fees">
+<meta name="description" content="Ledger Fees - school fees ledger platform">
+<meta name="theme-color" content="#0F4C4C">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Ledger Fees">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<style>
+  :root{
+    --bg:#F4F1EA;
+    --panel:#FFFFFF;
+    --ink:#1E2430;
+    --ink-soft:#6B7280;
+    --primary:#0F4C4C;
+    --primary-light:#176363;
+    --primary-dark:#0A3535;
+    --accent:#D9A441;
+    --line:#E4E0D4;
+    --ok:#1F8A55;
+    --bad:#C0392B;
+    --radius:10px;
+    --shadow:0 1px 3px rgba(20,20,10,0.06), 0 6px 18px rgba(20,20,10,0.05);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;font-size:15px;line-height:1.45;}
+  #app{max-width:1220px;margin:0 auto;padding:0 0 60px;}
+
+  header.topbar{background:linear-gradient(135deg,var(--primary),var(--primary-dark));color:#fff;padding:22px 28px 18px;border-bottom:5px solid var(--accent);box-shadow:var(--shadow);}
+  header.topbar h1{font-family:Georgia,"Times New Roman",serif;font-size:25px;margin:0 0 4px;}
+  header.topbar .sub{color:#CFE3E0;font-size:13.5px;}
+
+  .top-row{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:14px;}
+  .signed-in{font-size:13px;color:#CFE3E0;}
+  .signed-in strong{color:#fff;}
+  .role-badge{display:inline-block;font-size:10.5px;padding:2px 9px;border-radius:999px;font-weight:700;background:var(--accent);color:#2A2210;margin-left:6px;}
+
+  .save-note{font-size:12px;color:#CFE3E0;}
+  .save-note.saved{color:#8FE0B8;}
+
+  .class-bar{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;align-items:center;}
+  .class-pill{appearance:none;border:1px solid #2E6363;background:var(--primary-light);color:#fff;padding:7px 15px;border-radius:999px;font-size:13px;cursor:pointer;font-weight:600;transition:background .15s;}
+  .class-pill:hover{background:#1E7A7A;}
+  .class-pill.active{background:var(--accent);border-color:var(--accent);color:#2A2210;}
+  .add-form{display:flex;gap:6px;margin-left:auto;align-items:center;flex-wrap:wrap;}
+  .add-form input, .add-form select{padding:7px 9px;border-radius:6px;border:1px solid #2E6363;background:var(--primary-light);color:#fff;font-size:13px;min-width:130px;}
+  .add-form input::placeholder{color:#CFE3E0;}
+
+  .term-bar{display:flex;flex-wrap:wrap;gap:10px 20px;margin-top:14px;align-items:flex-end;}
+  .term-bar .field label{color:#CFE3E0;}
+  .term-bar select, .term-bar input{background:var(--primary-light);border:1px solid #2E6363;color:#fff;border-radius:6px;padding:7px 9px;font-size:13.5px;}
+  .term-bar input::placeholder{color:#CFE3E0;}
+
+  .section-toggle{display:flex;gap:4px;background:rgba(255,255,255,0.12);border-radius:999px;padding:4px;margin-top:16px;width:fit-content;}
+  .section-toggle button{appearance:none;border:none;background:transparent;color:#CFE3E0;padding:8px 18px;border-radius:999px;font-size:13.5px;font-weight:700;cursor:pointer;}
+  .section-toggle button.active{background:var(--accent);color:#2A2210;}
+
+  nav.tabs{display:flex;gap:2px;padding:0 28px;background:#EDE9DD;border-bottom:2px solid var(--line);overflow-x:auto;}
+  nav.tabs button{appearance:none;border:none;background:transparent;padding:12px 18px;font-size:14px;font-weight:600;color:var(--ink-soft);cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap;}
+  nav.tabs button:hover{color:var(--ink);}
+  nav.tabs button.active{color:var(--primary);border-bottom:3px solid var(--accent);}
+
+  main{padding:26px 28px 10px;}
+
+  h2.section-title{font-family:Georgia,"Times New Roman",serif;font-size:21px;margin:0 0 4px;color:var(--primary);}
+  p.section-hint{color:var(--ink-soft);font-size:13.5px;margin:0 0 18px;}
+
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:18px 20px;margin-bottom:20px;box-shadow:var(--shadow);}
+  .panel h3{margin:0 0 12px;font-size:15.5px;color:var(--primary);font-family:Georgia,"Times New Roman",serif;}
+  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;}
+  .field{display:flex;flex-direction:column;gap:4px;}
+  .field label{font-size:12px;color:var(--ink-soft);}
+  input[type=text], input[type=number], input[type=date], input[type=password], select{border:1px solid var(--line);border-radius:6px;padding:8px 10px;font-size:14px;font-family:inherit;color:var(--ink);background:#fff;}
+  input:focus, select:focus{outline:2px solid var(--accent);outline-offset:1px;}
+
+  button.btn{appearance:none;border:1px solid var(--primary);background:var(--primary);color:#fff;padding:9px 17px;border-radius:7px;font-size:13.5px;font-weight:600;cursor:pointer;transition:background .15s;}
+  button.btn:hover{background:var(--primary-light);}
+  button.btn.secondary{background:#fff;color:var(--primary);}
+  button.btn.secondary:hover{background:var(--bg);}
+  button.btn.danger{background:#fff;color:var(--bad);border-color:var(--bad);}
+  button.btn.danger:hover{background:#FBEEEC;}
+  button.icon-x{border:none;background:none;color:var(--bad);cursor:pointer;font-size:15px;line-height:1;padding:4px 6px;}
+
+  table{border-collapse:collapse;width:100%;font-size:13.5px;}
+  th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;}
+  th{background:var(--bg);color:var(--primary);font-weight:700;}
+  tbody tr:nth-child(even){background:#FBFAF5;}
+  .table-wrap{overflow-x:auto;}
+  .num{text-align:right;}
+  .balance-owing{color:var(--bad);font-weight:700;}
+  .balance-clear{color:var(--ok);font-weight:700;}
+  .tag{display:inline-block;font-size:10.5px;padding:2px 8px;border-radius:999px;font-weight:700;background:var(--accent);color:#2A2210;margin-left:6px;}
+
+  .empty-state{border:1px dashed var(--line);border-radius:var(--radius);padding:34px 20px;text-align:center;color:var(--ink-soft);background:var(--panel);}
+  .empty-state strong{display:block;color:var(--ink);margin-bottom:6px;font-size:15px;}
+
+  .stat-grid{display:flex;flex-wrap:wrap;gap:14px;margin-bottom:20px;}
+  .stat-box{flex:1 1 150px;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px;box-shadow:var(--shadow);}
+  .stat-box .label{font-size:12px;color:var(--ink-soft);}
+  .stat-box .value{font-family:Georgia,serif;font-size:22px;color:var(--primary);font-weight:700;}
+
+  /* ---- Login ---- */
+  .login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:radial-gradient(circle at top left,#155656,var(--bg) 60%);}
+  .login-card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:36px 34px;max-width:420px;width:100%;box-shadow:0 10px 30px rgba(15,60,60,0.15);}
+  .login-emoji{font-size:34px;margin-bottom:6px;}
+  .login-title{font-family:Georgia,"Times New Roman",serif;color:var(--primary);margin:0 0 4px;font-size:24px;}
+  .login-error{color:var(--bad);font-size:13px;background:#FBEEEC;border:1px solid #F1C6BE;border-radius:6px;padding:8px 10px;}
+
+  @media (max-width:640px){
+    header.topbar{padding:18px 16px;}
+    main{padding:18px 16px;}
+    nav.tabs{padding:0 16px;}
+    .add-form{margin-left:0;width:100%;}
+    .add-form input{flex:1;}
+    .login-card{padding:26px 20px;}
+  }
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="loginScreen"></div>
+  <div id="mainApp" style="display:none;"></div>
+</div>
+
+<script>
+(function(){
+
+  /* ============================================================
+     PLATFORM DATA MODEL
+
+     platform = {
+       superAdmin: { username, password },
+       schools: [
+         { id, name, clerkUsername, clerkPassword,
+           data: {
+             classes: [ { id, name, students:[{id,name,repeating}], terms:[ClassTerm], activeTermId, transfersOut:[] } ],
+             terms: [ { id, label, year, expenses:[] } ],   // school-wide, holds whole-school expenses
+             teachers: [ { id, name, payments:[] } ],
+             collections: [ { id, name, targetAmount, contributions:[], expenses:[] } ],
+             activeClassId, activeTeacherFilter, activeSummaryYear, activeSchoolTermKey, activeCollectionId
+           }
+         }
+       ]
+     }
+     ClassTerm = { id, label, year, defaultFee,
+                   openingBalances:{studentId:num}   (previous term balance),
+                   termCharges:{studentId:num}       (this term's balance, i.e. the fee charged),
+                   payments:[{id,studentId,date,amount,note}] }
+     Expected amount for a learner = previous term balance + this term's balance (calculated, never typed).
+     student = { id, name, adm, gender, repeating }
+     school  = { ..., county, subCounty, schoolType: "Public" | "Private" }
+  ============================================================ */
+
+  /* ===== ONLINE SETTINGS: paste your own Supabase details here (see the setup guide) ===== */
+  var SUPABASE_URL = "https://ittibrxucfysyrjaxnng.supabase.co";   // e.g. https://abcdxyz.supabase.co
+  var SUPABASE_KEY = "sb_publishable_X6CyhOCvEoMi0zHtP_pW_Q_Fo8I14Rb"; // the public "anon" / "publishable" key
+  /* ======================================================================================= */
+
+  var STORAGE_KEY = "remedial_platform_v2"; // only used to import data that was saved on this device before going online
+  var SESSION_KEY = "remedial_platform_session_v2";
+  var OLD_FLAT_KEY = "remedial_ledger_db_v1";
+
+  var platform = null;
+  var session = null;
+  var db = null; // reference to the signed-in school's `data` object
+
+  var currentSection = "remedial"; // "remedial" | "collections"
+  var currentTab = "students";
+
+  function uid(prefix){ return prefix + "_" + Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+  function esc(s){
+    return String(s === undefined || s === null ? "" : s)
+      .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+  }
+  function money(n){
+    if(n === null || n === undefined || isNaN(n)) return "0.00";
+    return Number(n).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
+  }
+  function todayISO(){ return new Date().toISOString().slice(0,10); }
+
+  function storageAvailable(){
+    try{ var t="__t__"; window.localStorage.setItem(t,"1"); window.localStorage.removeItem(t); return true; }
+    catch(e){ return false; }
+  }
+  var HAS_STORAGE = storageAvailable();
+
+  function setSaveNote(text, ok){
+    var el = document.getElementById("saveNote");
+    if(!el) return;
+    el.textContent = text;
+    el.className = "save-note" + (ok ? " saved" : "");
+  }
+
+  /* ---------------- Online storage (Supabase) ---------------- */
+
+  function rpc(fn, args){
+    var headers = { "Content-Type":"application/json", "apikey": SUPABASE_KEY };
+    if(SUPABASE_KEY.indexOf("eyJ") === 0) headers["Authorization"] = "Bearer " + SUPABASE_KEY;
+    return fetch(SUPABASE_URL + "/rest/v1/rpc/" + fn, { method:"POST", headers: headers, body: JSON.stringify(args || {}) })
+      .then(function(r){
+        return r.json().catch(function(){ return null; }).then(function(j){
+          if(!r.ok){
+            var err = new Error((j && (j.message || j.error)) || ("Error " + r.status));
+            err.status = r.status; throw err;
+          }
+          return j;
+        });
+      });
+  }
+  function isConfigured(){ return SUPABASE_URL.indexOf("http") === 0 && SUPABASE_KEY.indexOf("PASTE_") !== 0; }
+
+  var versions = {};   // schoolId -> version last seen on the server
+  var lastSaved = {};  // schoolId -> JSON text last saved to / loaded from the server
+  var saving = false, dirty = false, retryTimer = null, saveTimer = null;
+
+  function snapshotServerState(){
+    versions = {}; lastSaved = {};
+  }
+
+  function applyLoaded(res){
+    snapshotServerState();
+    var list = [];
+    (res.schools || []).forEach(function(row){
+      list.push(row.doc);
+      versions[row.doc.id] = row.version;
+    });
+    platform = { superAdmin: { username: res.super_username || "", password: "" }, schools: list };
+    normalizePlatform(platform);
+    platform.schools.forEach(function(sc){ lastSaved[sc.id] = JSON.stringify(sc); });
+  }
+
+  function loadOnline(){
+    return rpc("lf_load", { p_token: session.token }).then(applyLoaded);
+  }
+
+  function setSessionFromLogin(res){
+    session = { role: res.role, schoolId: null, classId: null, token: res.token };
+  }
+
+  function normalizePlatform(p){
+    p.schools.forEach(function(s){
+      if(!s.data) s.data = defaultSchoolData();
+      if(!s.data.classes) s.data.classes = [];
+      if(!s.data.collections) s.data.collections = [];
+      if(!s.data.terms) s.data.terms = [];
+      if(!s.data.messages) s.data.messages = [];
+      if(s.data.lastMessagesViewedAt === undefined) s.data.lastMessagesViewedAt = null;
+      if(s.adminUsername === undefined) s.adminUsername = "";
+      if(s.adminPassword === undefined) s.adminPassword = "";
+      s.data.collections.forEach(function(col){ if(col.requiresApproval === undefined) col.requiresApproval = false; });
+    });
+    normalizeNew(p);
+  }
+
+  function saveDB(){
+    dirty = true;
+    setSaveNote("Saving...", false);
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(flushSave, 500);
+  }
+  function saveNow(){ clearTimeout(saveTimer); flushSave(); }
+
+  function flushSave(){
+    if(!session || !session.token || !platform) return;
+    if(saving){ dirty = true; return; }
+    var changed = platform.schools.filter(function(sc){ return JSON.stringify(sc) !== lastSaved[sc.id]; });
+    var removed = Object.keys(lastSaved).filter(function(id){ return !findSchool(id); });
+    if(!changed.length && !removed.length){ dirty = false; setSaveNote("All changes saved", true); return; }
+    saving = true; dirty = false;
+    var chain = Promise.resolve();
+    changed.forEach(function(sc){
+      var snap = JSON.stringify(sc);
+      chain = chain.then(function(){
+        return rpc("lf_save_school", { p_token: session.token, p_school_id: sc.id, p_doc: sc, p_version: versions[sc.id] || 0 })
+          .then(function(newVersion){ versions[sc.id] = newVersion; lastSaved[sc.id] = snap; });
+      });
+    });
+    removed.forEach(function(id){
+      chain = chain.then(function(){
+        return rpc("lf_delete_school", { p_token: session.token, p_school_id: id })
+          .then(function(){ delete lastSaved[id]; delete versions[id]; });
+      });
+    });
+    chain.then(function(){
+      saving = false;
+      if(dirty){ flushSave(); } else { setSaveNote("All changes saved", true); }
+    }).catch(function(e){
+      saving = false;
+      handleSaveError(e);
+    });
+  }
+
+  function handleSaveError(e){
+    var m = String((e && e.message) || "");
+    if(m.indexOf("CONFLICT") >= 0){
+      reloadAndRefresh("Another person updated these records at the same moment. The latest records have been loaded. Please check your last entry and repeat it if it is missing.");
+    } else if(m.indexOf("USERNAME_TAKEN") >= 0){
+      reloadAndRefresh("That username is already used by someone else, so the change was not saved. Please choose a different username.");
+    } else if(m.indexOf("SESSION_EXPIRED") >= 0){
+      session = { role:null, schoolId:null, classId:null }; saveSession();
+      renderLogin("Your session has expired. Please sign in again.");
+    } else if(m.indexOf("FORBIDDEN") >= 0){
+      reloadAndRefresh("You are not allowed to make that change.");
+    } else {
+      setSaveNote("No connection - will retry automatically", false);
+      dirty = true;
+      clearTimeout(retryTimer);
+      retryTimer = setTimeout(flushSave, 8000);
+    }
+  }
+
+  window.addEventListener("online", function(){ if(dirty) flushSave(); });
+
+  function reloadAndRefresh(message){
+    return loadOnline().then(function(){
+      refreshView();
+      if(message) alert(message);
+    }).catch(function(){
+      setSaveNote("Could not reload - check your connection", false);
+    });
+  }
+
+  /* Re-draws the screen for the signed-in role without losing the tab the person is on. */
+  function refreshView(){
+    if(!session || !session.role) return;
+    if(session.role === "superadmin"){ renderSuperAdminContent(); return; }
+    if(session.role === "clerk" || session.role === "schooladmin"){
+      var school = currentSchool();
+      if(!school){ logout(); return; }
+      db = school.data;
+      renderClerkShell();
+      renderClerkTab();
+      return;
+    }
+    startApp();
+  }
+
+  /* Pick up changes other people made, every minute, but never while you are typing or saving. */
+  setInterval(function(){
+    if(!session || !session.token || saving || dirty || document.hidden) return;
+    var ae = document.activeElement;
+    if(ae && /^(INPUT|SELECT|TEXTAREA)$/.test(ae.tagName)) return;
+    rpc("lf_versions", { p_token: session.token }).then(function(v){
+      var differs = Object.keys(v || {}).some(function(id){ return versions[id] !== v[id]; }) ||
+                    Object.keys(versions).some(function(id){ return v && v[id] === undefined && session.role !== "superadmin"; });
+      if(differs && !saving && !dirty){ reloadAndRefresh(null); }
+    }).catch(function(){});
+  }, 60000);
+
+  function defaultPlatform(){
+    return { superAdmin: { username:"owner", password:"owner123" }, schools: [] };
+  }
+  function defaultSchoolData(){
+    return { classes: [], terms: [], teachers: [], collections: [], messages: [],
+      activeClassId:null, activeTeacherFilter:null, activeSummaryYear:null, activeSchoolTermKey:null, activeCollectionId:null, lastMessagesViewedAt:null };
+  }
+
+  /* Every "Other Collection" is a full ledger of its own (classes, learners, terms, payments, expenses, teachers),
+     built exactly like the Remedial Ledger and kept completely apart from it and from every other collection. */
+  function newLedger(){
+    return { classes: [], terms: [], teachers: [],
+      activeClassId:null, activeTeacherFilter:null, activeSummaryYear:null, activeSchoolTermKey:null };
+  }
+
+  function schoolTermKey(label,year){ return label + "||" + year; }
+  function getOrCreateSchoolTerm(data, label, year){
+    var key = schoolTermKey(label, year);
+    var t = data.terms.find(function(x){ return schoolTermKey(x.label,x.year) === key; });
+    if(!t){ t = { id: uid("sterm"), label: label, year: Number(year), expenses: [] }; data.terms.push(t); }
+    return t;
+  }
+
+  function migrateOldFlatDB(){
+    if(!HAS_STORAGE) return null;
+    try{
+      var raw = window.localStorage.getItem(OLD_FLAT_KEY);
+      if(!raw) return null;
+      var old = JSON.parse(raw);
+      var p = defaultPlatform();
+      var data = defaultSchoolData();
+      data.classes = old.classes || [];
+      data.teachers = old.teachers || [];
+      var yr = new Date().getFullYear();
+      data.classes.forEach(function(cls){
+        cls.transfersOut = cls.transfersOut || [];
+        cls.classTeacher = cls.classTeacher || null;
+        (cls.students||[]).forEach(function(st){ if(st.repeating===undefined) st.repeating=false; });
+        (cls.terms||[]).forEach(function(t){
+          if(!t.year) t.year = yr;
+          if(t.expenses && t.expenses.length){
+            var st = getOrCreateSchoolTerm(data, t.label, t.year);
+            st.expenses = st.expenses.concat(t.expenses);
+          }
+          delete t.expenses;
+        });
+      });
+      var school = { id: uid("sch"), name: (old.schoolName || "My School"), clerkUsername:"clerk", clerkPassword:"clerk123", adminUsername:"", adminPassword:"", data: data };
+      p.schools.push(school);
+      return p;
+    } catch(e){ return null; }
+  }
+
+  /* Adds the newer fields to data saved by older versions. */
+  function normalizeLedger(data){
+    if(!data.classes) data.classes = [];
+    if(!data.terms) data.terms = [];
+    if(!data.teachers) data.teachers = [];
+    data.classes.forEach(function(cls){
+      if(!cls.transfersOut) cls.transfersOut = [];
+      if(cls.classTeacher === undefined) cls.classTeacher = null;
+      (cls.students || []).forEach(function(st){
+        if(st.repeating === undefined) st.repeating = false;
+        if(st.adm === undefined) st.adm = "";
+        if(st.gender === undefined) st.gender = "";
+      });
+      (cls.terms || []).forEach(function(t){
+        if(!t.openingBalances) t.openingBalances = {};
+        if(!t.payments) t.payments = [];
+        if(!t.termCharges){
+          t.termCharges = {};
+          var fee = Number(t.expectedAmount) || 0;
+          t.defaultFee = fee;
+          if(fee){ (cls.students || []).forEach(function(st){ t.termCharges[st.id] = fee; }); }
+        }
+        if(t.defaultFee === undefined) t.defaultFee = 0;
+      });
+    });
+  }
+
+  /* An old-style collection (a plain list of contributions and expenses) becomes a ledger: one class called
+     "Contributions", one learner per contributor, and the expenses moved across, so no money is lost. */
+  function collectionToLedger(col){
+    var ledger = newLedger();
+    var yr = new Date().getFullYear();
+    var contributions = col.contributions || [];
+    if(contributions.length || (col.expenses || []).length){
+      var term = { id: uid("term"), label: "Term 1", year: yr, defaultFee: 0, openingBalances: {}, termCharges: {}, payments: [] };
+      var cls = { id: uid("cls"), name: "Contributions", students: [], terms: [term], activeTermId: term.id, transfersOut: [], classTeacher: null };
+      var byName = {};
+      contributions.forEach(function(ct){
+        var nm = (ct.note || "").trim() || "Unnamed contributor";
+        if(!byName[nm]){
+          byName[nm] = { id: uid("stu"), name: nm, adm: "", gender: "", repeating: false };
+          cls.students.push(byName[nm]);
+        }
+        var entry = {}; Object.keys(ct).forEach(function(k){ entry[k] = ct[k]; });
+        entry.studentId = byName[nm].id; entry.note = "";
+        term.payments.push(entry);
+      });
+      ledger.classes.push(cls);
+      ledger.activeClassId = cls.id;
+      if((col.expenses || []).length){
+        getOrCreateSchoolTerm(ledger, "Term 1", yr).expenses = col.expenses.slice();
+        ledger.activeSchoolTermKey = schoolTermKey("Term 1", yr);
+      }
+    }
+    return ledger;
+  }
+
+  function normalizeNew(p){
+    p.schools.forEach(function(s){
+      if(s.county === undefined) s.county = "";
+      if(s.subCounty === undefined) s.subCounty = "";
+      if(s.schoolType === undefined) s.schoolType = "";
+      normalizeLedger(s.data);
+      (s.data.collections || []).forEach(function(col){
+        if(!col.ledger){
+          col.ledger = collectionToLedger(col);
+          delete col.contributions; delete col.expenses; delete col.targetAmount; delete col.requiresApproval;
+        }
+        normalizeLedger(col.ledger);
+        if(!col.committee) col.committee = [];
+      });
+    });
+  }
+
+  /* One-time: bring schools that were saved in this browser (the old offline version) into the online database. */
+  function offerLocalImport(){
+    if(!HAS_STORAGE || session.role !== "superadmin") return;
+    try{
+      if(window.localStorage.getItem("lf_local_import_done")) return;
+      var raw = window.localStorage.getItem(STORAGE_KEY);
+      if(!raw) return;
+      var local = JSON.parse(raw);
+      var fresh = (local.schools || []).filter(function(ls){ return !findSchool(ls.id); });
+      if(!fresh.length){ window.localStorage.setItem("lf_local_import_done","1"); return; }
+      if(confirm("This device holds " + fresh.length + " school(s) saved before going online. Upload them to the online database now?")){
+        fresh.forEach(function(ls){ platform.schools.push(ls); });
+        normalizePlatform(platform);
+        window.localStorage.setItem("lf_local_import_done","1");
+        saveNow();
+        renderSuperAdminContent();
+      }
+    } catch(e){}
+  }
+
+  function loadSession(){
+    session = { role:null, schoolId:null, classId:null };
+    if(HAS_STORAGE){
+      try{ var raw = window.localStorage.getItem(SESSION_KEY); if(raw) session = JSON.parse(raw); }
+      catch(e){}
+    }
+  }
+  function saveSession(){
+    if(!HAS_STORAGE) return;
+    try{ window.localStorage.setItem(SESSION_KEY, JSON.stringify(session)); } catch(e){}
+  }
+
+  /* Every class of a school: the remedial classes plus the classes inside each collection. */
+  function allClassesOf(s){
+    var list = (s.data.classes || []).map(function(c){ return { cls: c, ledgerId: null }; });
+    (s.data.collections || []).forEach(function(col){
+      (col.ledger.classes || []).forEach(function(c){ list.push({ cls: c, ledgerId: col.id }); });
+    });
+    return list;
+  }
+  function findClassEntry(s, classId){
+    return allClassesOf(s).find(function(e){ return e.cls.id === classId; }) || null;
+  }
+  function findCommitteeMember(s, ledgerId, memberId){
+    var col = (s.data.collections || []).find(function(c){ return c.id === ledgerId; });
+    if(!col) return null;
+    var member = (col.committee || []).find(function(m){ return m.id === memberId; });
+    return member ? { col: col, member: member } : null;
+  }
+  function ledgerDataFor(s, ledgerId){
+    if(!ledgerId) return s.data;
+    var col = (s.data.collections || []).find(function(c){ return c.id === ledgerId; });
+    return col ? col.ledger : null;
+  }
+  function sdata(){ var sc = currentSchool(); return sc ? sc.data : null; }
+
+  function findSchool(id){ return platform.schools.find(function(s){ return s.id===id; }); }
+  function currentSchool(){ return session.schoolId ? findSchool(session.schoolId) : null; }
+
+  function isUsernameTaken(username, exceptRef, exceptField){
+    var u = (username||"").trim().toLowerCase();
+    if(!u) return false;
+    if(platform.superAdmin !== exceptRef && platform.superAdmin.username.toLowerCase() === u) return true;
+    for(var i=0;i<platform.schools.length;i++){
+      var s = platform.schools[i];
+      var skipClerk = (s === exceptRef && exceptField === "clerk");
+      var skipAdmin = (s === exceptRef && exceptField === "admin");
+      if(!skipClerk && (s.clerkUsername||"").toLowerCase() === u) return true;
+      if(!skipAdmin && (s.adminUsername||"").toLowerCase() === u) return true;
+      var entries = allClassesOf(s);
+      for(var j=0;j<entries.length;j++){
+        var cl = entries[j].cls;
+        if(cl.classTeacher && cl.classTeacher !== exceptRef && (cl.classTeacher.username||"").toLowerCase() === u) return true;
+      }
+      var colsU = s.data.collections || [];
+      for(var k=0;k<colsU.length;k++){
+        var mem = colsU[k].committee || [];
+        for(var m=0;m<mem.length;m++){
+          if(mem[m] !== exceptRef && (mem[m].username||"").toLowerCase() === u) return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  function attemptLogin(username, password){
+    return rpc("lf_login", { p_username: username, p_password: password }).then(function(res){
+      if(!res || res.error){ return { ok:false, error: res && res.error }; }
+      setSessionFromLogin(res);
+      return rpc("lf_load", { p_token: session.token }).then(function(info){
+        applyLoaded(info);
+        if(info.role !== "superadmin"){
+          session.schoolId = info.school_id || null;
+          session.classId = info.class_id || null;
+          session.ledgerId = info.ledger_id || null;
+          session.memberId = info.member_id || null;
+        }
+        saveSession();
+        return { ok:true };
+      });
+    });
+  }
+  function logout(){
+    var tok = session && session.token;
+    if(tok){ rpc("lf_logout", { p_token: tok }).catch(function(){}); }
+    clearTimeout(saveTimer);
+    session = { role:null, schoolId:null, classId:null };
+    saveSession();
+    renderLogin();
+  }
+
+  /* ---------------- Login screen ---------------- */
+
+  function renderLogin(msg){
+    document.getElementById("mainApp").style.display = "none";
+    var el = document.getElementById("loginScreen");
+    el.style.display = "block";
+    el.innerHTML =
+      '<div class="login-wrap"><div class="login-card">' +
+      '<div class="login-emoji">&#127979;</div>' +
+      '<h1 class="login-title">Ledger Fees</h1>' +
+      '<p class="section-hint">Sign in with your username and password.</p>' +
+      '<div class="row" style="flex-direction:column;align-items:stretch;gap:12px;">' +
+        '<div class="field"><label>Username</label><input type="text" id="loginUsername" autocomplete="username"></div>' +
+        '<div class="field"><label>Password</label><input type="password" id="loginPassword" autocomplete="current-password"></div>' +
+        (msg ? '<div class="login-error">'+esc(msg)+'</div>' : '') +
+        '<button class="btn" id="loginSubmitBtn" style="align-self:flex-start;">Sign in</button>' +
+      '</div>' +
+      '</div></div>';
+
+    function doLogin(){
+      var uname = el.querySelector("#loginUsername").value;
+      var pass = el.querySelector("#loginPassword").value;
+      var btn = el.querySelector("#loginSubmitBtn");
+      if(!isConfigured()){ renderLogin("This app is not connected to its online database yet. Add the Supabase URL and key in the file."); return; }
+      btn.disabled = true; btn.textContent = "Signing in...";
+      attemptLogin(uname, pass).then(function(r){
+        if(r.ok){ startApp(); offerLocalImport(); }
+        else if(r.error === "TOO_MANY_ATTEMPTS"){ renderLogin("Too many wrong attempts. Please wait 10 minutes and try again."); }
+        else { renderLogin("Incorrect username or password."); }
+      }).catch(function(){ renderLogin("Could not connect. Check your internet connection and try again."); });
+    }
+    el.querySelector("#loginSubmitBtn").onclick = doLogin;
+    ["loginUsername","loginPassword"].forEach(function(id){
+      el.querySelector("#"+id).addEventListener("keydown", function(e){ if(e.key==="Enter") doLogin(); });
+    });
+  }
+
+  function startApp(){
+    document.getElementById("loginScreen").style.display = "none";
+    var mainApp = document.getElementById("mainApp");
+    mainApp.style.display = "block";
+    if(session.role === "superadmin"){
+      renderSuperAdminApp();
+    } else if(session.role === "committee"){
+      var csch = currentSchool();
+      var cfound = csch ? findCommitteeMember(csch, session.ledgerId, session.memberId) : null;
+      if(!csch || !cfound){ logout(); return; }
+      db = cfound.col.ledger;
+      renderCommitteeApp(csch, cfound.col, cfound.member);
+    } else if(session.role === "classteacher"){
+      var sch = currentSchool();
+      var entry = sch ? findClassEntry(sch, session.classId) : null;
+      if(!sch || !entry){ logout(); return; }
+      db = ledgerDataFor(sch, entry.ledgerId) || sch.data;
+      session.ledgerId = entry.ledgerId;
+      renderClassTeacherApp(sch, entry.cls);
+    } else {
+      var school = currentSchool();
+      if(!school){ logout(); return; }
+      db = school.data;
+      currentSection = "remedial";
+      currentTab = "students";
+      renderClerkShell();
+      renderClerkTab();
+    }
+  }
+
+  /* ================= SUPER ADMIN VIEW ================= */
+
+  var COUNTIES = ["Mombasa","Kwale","Kilifi","Tana River","Lamu","Taita-Taveta","Garissa","Wajir","Mandera","Marsabit","Isiolo","Meru","Tharaka-Nithi","Embu","Kitui","Machakos","Makueni","Nyandarua","Nyeri","Kirinyaga","Murang'a","Kiambu","Turkana","West Pokot","Samburu","Trans-Nzoia","Uasin Gishu","Elgeyo-Marakwet","Nandi","Baringo","Laikipia","Nakuru","Narok","Kajiado","Kericho","Bomet","Kakamega","Vihiga","Bungoma","Busia","Siaya","Kisumu","Homa Bay","Migori","Kisii","Nyamira","Nairobi"];
+  function countyOptions(cur){
+    return '<option value="">- select county -</option>' + COUNTIES.map(function(n){ return '<option value="'+esc(n)+'"'+(n===cur?' selected':'')+'>'+esc(n)+'</option>'; }).join("");
+  }
+  function typeOptions(cur){
+    return '<option value="">- select -</option>' + ["Public","Private"].map(function(n){ return '<option value="'+n+'"'+(n===cur?' selected':'')+'>'+n+'</option>'; }).join("");
+  }
+
+  function renderSuperAdminApp(){
+    var mainApp = document.getElementById("mainApp");
+    mainApp.innerHTML =
+      '<header class="topbar">' +
+        '<h1>Ledger Fees</h1>' +
+        '<div class="sub">Platform owner dashboard - create and manage school accounts.</div>' +
+        '<div class="top-row">' +
+          '<span class="signed-in">Signed in as <strong>'+esc(platform.superAdmin.username)+'</strong><span class="role-badge">Platform Super Admin</span></span>' +
+          '<span class="save-note" id="saveNote"></span>' +
+          '<button class="btn secondary" id="logoutBtn">Switch user</button>' +
+        '</div>' +
+      '</header>' +
+      '<main id="adminContent"></main>';
+    mainApp.querySelector("#logoutBtn").onclick = logout;
+    renderSuperAdminContent();
+  }
+
+  function renderSuperAdminContent(){
+    var c = document.getElementById("adminContent");
+    var html = '<h2 class="section-title">Schools</h2>' +
+      '<p class="section-hint">Create one account per school. Each school gets its own username and password for the person who will update its records (the school clerk / administrator). Schools cannot see each other\'s data.</p>';
+
+    html += '<div class="panel"><h3>My login (platform super admin)</h3>' +
+      '<p class="section-hint" style="margin-bottom:10px;">Change your own username and password. Type your current password to confirm. Leave the new password blank to keep the current one.</p>' +
+      '<div class="row">' +
+      '<div class="field"><label>Username</label><input type="text" id="saUser" value="'+esc(platform.superAdmin.username)+'" style="width:170px;"></div>' +
+      '<div class="field"><label>Current password</label><input type="password" id="saCurPass" autocomplete="current-password" style="width:170px;"></div>' +
+      '<div class="field"><label>New password</label><input type="password" id="saNewPass" autocomplete="new-password" style="width:170px;"></div>' +
+      '<div class="field"><label>Confirm new password</label><input type="password" id="saNewPass2" autocomplete="new-password" style="width:170px;"></div>' +
+      '<button class="btn" id="saSaveBtn">Save my login</button>' +
+      '</div></div>';
+
+    html += '<div class="panel"><h3>Add a new school</h3><div class="row">' +
+      '<div class="field"><label>School name</label><input type="text" id="newSchoolName" placeholder="e.g. Kilimani Junior School" style="min-width:200px;"></div>' +
+      '<div class="field"><label>County</label><select id="newSchoolCounty">'+countyOptions("")+'</select></div>' +
+      '<div class="field"><label>Sub-county</label><input type="text" id="newSchoolSubCounty" placeholder="e.g. Westlands"></div>' +
+      '<div class="field"><label>Public or private</label><select id="newSchoolType">'+typeOptions("")+'</select></div>' +
+      '<div class="field"><label>Clerk username</label><input type="text" id="newSchoolUser" placeholder="e.g. kilimani.clerk"></div>' +
+      '<div class="field"><label>Clerk password</label><input type="text" id="newSchoolPass" placeholder="e.g. a strong password"></div>' +
+      '<div class="field"><label>School admin username</label><input type="text" id="newSchoolAdminUser" placeholder="e.g. kilimani.admin"></div>' +
+      '<div class="field"><label>School admin password</label><input type="text" id="newSchoolAdminPass" placeholder="e.g. a strong password"></div>' +
+      '<button class="btn" id="addSchoolBtn">Create school account</button>' +
+      '</div></div>';
+
+    if(platform.schools.length === 0){
+      html += '<div class="empty-state"><strong>No schools yet</strong>Use the form above to create the first school account.</div>';
+    } else {
+      html += '<div class="panel"><h3>Existing schools</h3><div class="table-wrap"><table><thead><tr><th>School</th><th>County</th><th>Sub-county</th><th>Public / Private</th><th>Clerk username</th><th>Clerk password</th><th>School admin username</th><th>School admin password</th><th style="width:150px;"></th></tr></thead><tbody>';
+      platform.schools.forEach(function(s){
+        html += '<tr><td><input type="text" data-school-name="'+s.id+'" value="'+esc(s.name)+'" style="width:100%"></td>' +
+          '<td><select data-school-county="'+s.id+'">'+countyOptions(s.county||"")+'</select></td>' +
+          '<td><input type="text" data-school-subcounty="'+s.id+'" value="'+esc(s.subCounty||"")+'" style="width:100%"></td>' +
+          '<td><select data-school-type="'+s.id+'">'+typeOptions(s.schoolType||"")+'</select></td>' +
+          '<td><input type="text" data-school-user="'+s.id+'" value="'+esc(s.clerkUsername)+'" style="width:100%"></td>' +
+          '<td><input type="text" data-school-pass="'+s.id+'" value="'+esc(s.clerkPassword)+'" style="width:100%"></td>' +
+          '<td><input type="text" data-school-admin-user="'+s.id+'" value="'+esc(s.adminUsername||"")+'" placeholder="set admin username" style="width:100%"></td>' +
+          '<td><input type="text" data-school-admin-pass="'+s.id+'" value="'+esc(s.adminPassword||"")+'" placeholder="set admin password" style="width:100%"></td>' +
+          '<td><button class="btn" data-open-school="'+s.id+'" style="padding:5px 10px;">Open account</button> <button class="icon-x" data-remove-school="'+s.id+'" title="Remove school">&times;</button></td></tr>';
+      });
+      html += '</tbody></table></div><p class="section-hint" style="margin:10px 0 0;">Changes to a school\'s name, username or password save automatically as you edit them.</p></div>';
+    }
+
+    c.innerHTML = html;
+
+    c.querySelector("#saSaveBtn").onclick = function(){
+      var newUser = c.querySelector("#saUser").value.trim();
+      var cur = c.querySelector("#saCurPass").value;
+      var np = c.querySelector("#saNewPass").value;
+      var np2 = c.querySelector("#saNewPass2").value;
+      if(!cur){ alert("Please type your current password."); return; }
+      if(!newUser){ alert("The username cannot be empty."); return; }
+      if(np || np2){
+        if(np !== np2){ alert("The new password and its confirmation do not match."); return; }
+        if(np.length < 6){ alert("Please use a new password of at least 6 characters."); return; }
+      }
+      rpc("lf_set_super", { p_token: session.token, p_current: cur, p_username: newUser, p_password: np || "" }).then(function(){
+        platform.superAdmin.username = newUser;
+        renderSuperAdminApp();
+        alert("Your login has been updated." + (np ? " Use the new password the next time you sign in." : ""));
+      }).catch(function(e){
+        var m = String(e.message || "");
+        if(m.indexOf("BAD_PASSWORD") >= 0) alert("Your current password is not correct.");
+        else if(m.indexOf("USERNAME_TAKEN") >= 0) alert("That username is already in use. Please choose another.");
+        else alert("Could not save. Check your connection and try again.");
+      });
+    };
+    c.querySelector("#addSchoolBtn").onclick = function(){
+      var name = c.querySelector("#newSchoolName").value.trim();
+      var county = c.querySelector("#newSchoolCounty").value;
+      var subCounty = c.querySelector("#newSchoolSubCounty").value.trim();
+      var schoolType = c.querySelector("#newSchoolType").value;
+      var user = c.querySelector("#newSchoolUser").value.trim();
+      var pass = c.querySelector("#newSchoolPass").value;
+      var adminUser = c.querySelector("#newSchoolAdminUser").value.trim();
+      var adminPass = c.querySelector("#newSchoolAdminPass").value;
+      if(!name || !county || !subCounty || !schoolType){ alert("Please fill in the school name, county, sub-county and whether the school is public or private."); return; }
+      if(!user || !pass || !adminUser || !adminPass){ alert("Please fill in the username and password for both the clerk and the school admin."); return; }
+      if(user.toLowerCase()===adminUser.toLowerCase() || isUsernameTaken(user) || isUsernameTaken(adminUser)){ alert("That username is already in use. Please choose another."); return; }
+      platform.schools.push({ id: uid("sch"), name:name, county:county, subCounty:subCounty, schoolType:schoolType, clerkUsername:user, clerkPassword:pass, adminUsername:adminUser, adminPassword:adminPass, data: defaultSchoolData() });
+      saveDB();
+      renderSuperAdminContent();
+    };
+    c.querySelectorAll("[data-school-name]").forEach(function(inp){
+      inp.addEventListener("change", function(){
+        var s = findSchool(inp.getAttribute("data-school-name"));
+        if(s){ s.name = inp.value.trim() || s.name; saveDB(); }
+      });
+    });
+    c.querySelectorAll("[data-school-county]").forEach(function(sel){
+      sel.addEventListener("change", function(){
+        var s = findSchool(sel.getAttribute("data-school-county"));
+        if(s){ s.county = sel.value; saveDB(); }
+      });
+    });
+    c.querySelectorAll("[data-school-subcounty]").forEach(function(inp){
+      inp.addEventListener("change", function(){
+        var s = findSchool(inp.getAttribute("data-school-subcounty"));
+        if(s){ s.subCounty = inp.value.trim(); saveDB(); }
+      });
+    });
+    c.querySelectorAll("[data-school-type]").forEach(function(sel){
+      sel.addEventListener("change", function(){
+        var s = findSchool(sel.getAttribute("data-school-type"));
+        if(s){ s.schoolType = sel.value; saveDB(); }
+      });
+    });
+    c.querySelectorAll("[data-open-school]").forEach(function(btn){
+      btn.onclick = function(){
+        var s = findSchool(btn.getAttribute("data-open-school"));
+        if(!s) return;
+        session = { role:"schooladmin", schoolId: s.id, classId:null, superOwner:true, token: session.token };
+        saveSession();
+        startApp();
+      };
+    });
+    c.querySelectorAll("[data-school-user]").forEach(function(inp){
+      inp.addEventListener("change", function(){
+        var s = findSchool(inp.getAttribute("data-school-user"));
+        if(!s) return;
+        var val = inp.value.trim();
+        if(!val){ inp.value = s.clerkUsername; return; }
+        var clash = isUsernameTaken(val, s, "clerk") || (s.adminUsername||"").toLowerCase()===val.toLowerCase();
+        if(clash){ alert("That username is already in use."); inp.value = s.clerkUsername; return; }
+        s.clerkUsername = val; saveDB();
+      });
+    });
+    c.querySelectorAll("[data-school-admin-user]").forEach(function(inp){
+      inp.addEventListener("change", function(){
+        var s = findSchool(inp.getAttribute("data-school-admin-user"));
+        if(!s) return;
+        var val = inp.value.trim();
+        if(!val){ inp.value = s.adminUsername || ""; return; }
+        var clash = isUsernameTaken(val, s, "admin") || (s.clerkUsername||"").toLowerCase()===val.toLowerCase();
+        if(clash){ alert("That username is already in use."); inp.value = s.adminUsername || ""; return; }
+        s.adminUsername = val; saveDB();
+      });
+    });
+    c.querySelectorAll("[data-school-admin-pass]").forEach(function(inp){
+      inp.addEventListener("change", function(){
+        var s = findSchool(inp.getAttribute("data-school-admin-pass"));
+        if(s){ s.adminPassword = inp.value || s.adminPassword || ""; saveDB(); }
+      });
+    });
+    c.querySelectorAll("[data-school-pass]").forEach(function(inp){
+      inp.addEventListener("change", function(){
+        var s = findSchool(inp.getAttribute("data-school-pass"));
+        if(s){ s.clerkPassword = inp.value || s.clerkPassword; saveDB(); }
+      });
+    });
+    c.querySelectorAll("[data-remove-school]").forEach(function(btn){
+      btn.onclick = function(){
+        if(!confirm("Remove this school account and all of its data? This cannot be undone.")) return;
+        var id = btn.getAttribute("data-remove-school");
+        platform.schools = platform.schools.filter(function(s){ return s.id !== id; });
+        saveDB();
+        renderSuperAdminContent();
+      };
+    });
+  }
+
+  /* ================= CLERK VIEW ================= */
+
+  /* defaultFee pre-fills each learner's "this term's balance" box; every learner's box can still be changed on the Students tab. */
+  function makeClassTerm(label, defaultFee, openingBalances, year, students){
+    var fee = Number(defaultFee) || 0;
+    var charges = {};
+    (students || []).forEach(function(st){ charges[st.id] = fee; });
+    return { id: uid("term"), label: label, year: Number(year)||new Date().getFullYear(), defaultFee: fee, openingBalances: openingBalances||{}, termCharges: charges, payments: [] };
+  }
+  function makeClass(name){
+    var label = "Term 1", year = new Date().getFullYear(), amount = 0;
+    if(db.activeSchoolTermKey){
+      var parts = db.activeSchoolTermKey.split("||");
+      label = parts[0]; year = Number(parts[1]) || year;
+    }
+    var t = makeClassTerm(label, amount, {}, year, []);
+    return { id: uid("cls"), name: name, students: [], terms: [t], activeTermId: t.id, transfersOut: [], classTeacher: null };
+  }
+  function termYear(term){ return term.year || new Date().getFullYear(); }
+
+  function getCurrentClass(){
+    if(!db.classes.length) return null;
+    var found = db.classes.find(function(c){ return c.id === db.activeClassId; });
+    if(found) return found;
+    db.activeClassId = db.classes[0].id;
+    saveDB();
+    return db.classes[0];
+  }
+  function getCurrentTerm(cls){
+    if(!cls) return null;
+    var t = cls.terms.find(function(x){ return x.id === cls.activeTermId; });
+    return t || cls.terms[cls.terms.length-1];
+  }
+
+  function openingOf(term, studentId){ return Number((term.openingBalances || {})[studentId]) || 0; }
+  function chargeOf(term, studentId){ return Number((term.termCharges || {})[studentId]) || 0; }
+  /* Expected = previous term balance + this term's balance. It is always calculated, never typed in. */
+  function studentDue(term, studentId){ return openingOf(term, studentId) + chargeOf(term, studentId); }
+  function forgetStudentInTerms(cls, id){
+    cls.terms.forEach(function(t){
+      t.payments = t.payments.filter(function(p){ return p.studentId !== id; });
+      delete t.openingBalances[id];
+      if(t.termCharges) delete t.termCharges[id];
+    });
+  }
+  function addStudentToClass(cls, name, adm, gender, openBal, termBal){
+    var st = { id: uid("stu"), name: name, adm: adm || "", gender: gender || "", repeating: false };
+    cls.students.push(st);
+    var t = getCurrentTerm(cls);
+    if(t){
+      if(!t.termCharges) t.termCharges = {};
+      if(Number(openBal)) t.openingBalances[st.id] = Number(openBal);
+      t.termCharges[st.id] = (termBal === undefined || termBal === null || termBal === "") ? (Number(t.defaultFee) || 0) : (Number(termBal) || 0);
+    }
+    return st;
+  }
+  function isCounted(p){ return p.status === undefined || p.status === "approved"; }
+  function studentPaid(term, studentId){
+    return term.payments.filter(function(p){ return p.studentId===studentId && isCounted(p); }).reduce(function(a,p){ return a+Number(p.amount||0); },0);
+  }
+  function studentBalance(term, studentId){ return studentDue(term, studentId) - studentPaid(term, studentId); }
+
+  function termTotals(cls, term){
+    var totalDue=0, totalPaid=0;
+    cls.students.forEach(function(st){
+      totalDue += studentDue(term, st.id);
+      totalPaid += studentPaid(term, st.id);
+    });
+    return { totalDue: totalDue, totalPaid: totalPaid, totalBalance: totalDue-totalPaid };
+  }
+
+  /* Creates a new term for ONE class. Each learner's previous term balance is filled in from the class's latest term. */
+  function createTermForClass(cls, label, year, fee){
+    var prevTerm = cls.terms[cls.terms.length - 1];
+    var opening = {};
+    if(prevTerm){
+      cls.students.forEach(function(st){ opening[st.id] = studentBalance(prevTerm, st.id); });
+    }
+    var t = makeClassTerm(label, fee, opening, year, cls.students);
+    cls.terms.push(t);
+    cls.activeTermId = t.id;
+    getOrCreateSchoolTerm(db, label, year);
+    db.activeSchoolTermKey = schoolTermKey(label, year);
+    return t;
+  }
+  function startNewTermForSchool(label, year, fee){
+    db.classes.forEach(function(cls){ createTermForClass(cls, label, year, fee); });
+    getOrCreateSchoolTerm(db, label, year);
+    db.activeSchoolTermKey = schoolTermKey(label, year);
+    saveDB();
+  }
+
+  var TESSERACT_URL = "https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js";
+  var tesseractLoading = false;
+  function ensureTesseract(onReady, onError){
+    if(window.Tesseract){ onReady(); return; }
+    if(tesseractLoading){
+      var iv = setInterval(function(){
+        if(window.Tesseract){ clearInterval(iv); onReady(); }
+      }, 200);
+      return;
+    }
+    tesseractLoading = true;
+    var s = document.createElement("script");
+    s.src = TESSERACT_URL;
+    s.onload = function(){ tesseractLoading = false; onReady(); };
+    s.onerror = function(){ tesseractLoading = false; onError(); };
+    document.head.appendChild(s);
+  }
+
+  function renderOcrCandidates(cls, names, container){
+    var html = '<div class="table-wrap"><table><thead><tr><th style="width:34px;"></th><th>Name found</th></tr></thead><tbody>';
+    names.forEach(function(n,i){
+      html += '<tr><td><input type="checkbox" data-ocr-check="'+i+'" checked></td>' +
+        '<td><input type="text" data-ocr-text="'+i+'" value="'+esc(n)+'" style="width:100%;"></td></tr>';
+    });
+    html += '</tbody></table></div><button class="btn" id="addOcrNamesBtn" style="margin-top:10px;">Add selected names</button>';
+    container.innerHTML = html;
+    container.querySelector("#addOcrNamesBtn").onclick = function(){
+      var added = 0;
+      names.forEach(function(n,i){
+        var checkbox = container.querySelector('[data-ocr-check="'+i+'"]');
+        var textInput = container.querySelector('[data-ocr-text="'+i+'"]');
+        if(checkbox && checkbox.checked){
+          var name = textInput.value.trim();
+          if(name){ addStudentToClass(cls, name, "", "", 0, undefined); added++; }
+        }
+      });
+      if(added > 0){ saveDB(); renderClerkTab(); }
+    };
+  }
+
+  function moveStudentToClass(sourceCls, targetCls, studentId){
+    var idx = sourceCls.students.findIndex(function(s){ return s.id === studentId; });
+    if(idx === -1) return;
+    var student = sourceCls.students[idx];
+    var srcTerm = sourceCls.terms.find(function(t){ return t.id === sourceCls.activeTermId; });
+    var bal = srcTerm ? studentBalance(srcTerm, studentId) : 0;
+    sourceCls.students.splice(idx,1);
+    targetCls.students.push(student);
+    var tgtTerm = targetCls.terms.find(function(t){ return t.id === targetCls.activeTermId; });
+    if(tgtTerm){
+      /* the whole outstanding balance (previous balance + that term's balance - what was paid) goes with the learner */
+      tgtTerm.openingBalances[studentId] = (tgtTerm.openingBalances[studentId]||0) + bal;
+      if(!tgtTerm.termCharges) tgtTerm.termCharges = {};
+      if(tgtTerm.termCharges[studentId] === undefined) tgtTerm.termCharges[studentId] = Number(tgtTerm.defaultFee) || 0;
+    }
+  }
+
+  /* ---------------- Class teacher: restricted daily money entry ---------------- */
+
+  function activePaymentFor(term, studentId, date){
+    return term.payments.find(function(p){ return p.studentId===studentId && p.date===date && p.status !== "rejected"; });
+  }
+  function rejectedPaymentFor(term, studentId, date){
+    return term.payments.find(function(p){ return p.studentId===studentId && p.date===date && p.status === "rejected"; });
+  }
+  // Returns "locked" if the entry was already approved (teachers cannot change it), otherwise "saved".
+  function upsertDatedPayment(term, studentId, date, amount, enteredBy, enteredRole){
+    var existing = activePaymentFor(term, studentId, date);
+    if(existing && isCounted(existing)) return "locked";
+    if(amount > 0){
+      if(existing){ existing.amount = amount; existing.enteredAt = new Date().toISOString(); }
+      else { term.payments.push({ id: uid("pay"), studentId: studentId, date: date, amount: amount, note: "Recorded by " + String(enteredRole || "class teacher").toLowerCase(),
+        status: "pending", enteredBy: enteredBy, enteredRole: enteredRole, enteredAt: new Date().toISOString() }); }
+    } else if(existing){
+      term.payments = term.payments.filter(function(p){ return p !== existing; });
+    }
+    return "saved";
+  }
+  function pendingTotalForTerm(term){
+    return term.payments.filter(function(p){ return p.status === "pending"; }).reduce(function(a,p){ return a+Number(p.amount||0); },0);
+  }
+  function paymentStatusText(p){
+    if(!p) return "";
+    if(p.status === "pending") return "Awaiting approval";
+    if(p.status === "rejected") return "Rejected";
+    return "Approved";
+  }
+  function dailyTotalsForTerm(term){
+    var byDate = {};
+    term.payments.filter(isCounted).forEach(function(p){ byDate[p.date] = (byDate[p.date]||0) + Number(p.amount||0); });
+    return Object.keys(byDate).sort(function(a,b){ return b.localeCompare(a); }).map(function(d){ return { date:d, total: byDate[d] }; });
+  }
+  function yearTotalForClass(cls, year){
+    var total = 0;
+    cls.terms.filter(function(t){ return termYear(t) === year; }).forEach(function(t){
+      total += termTotals(cls, t).totalPaid;
+    });
+    return total;
+  }
+
+  function currentActor(){
+    var school = currentSchool();
+    if(session.superOwner) return { name: platform.superAdmin.username, role: "Platform Super Admin" };
+    if(session.role === "schooladmin") return { name: school ? school.adminUsername : "School admin", role: "School Admin" };
+    return { name: school ? school.clerkUsername : "Clerk", role: "Clerk" };
+  }
+  function actorLabel(){ var a = currentActor(); return a.role + " (" + a.name + ")"; }
+  function whoText(name, role){
+    if(!name) return "-";
+    return role ? name + " - " + role : name;
+  }
+  // A payment recorded straight by the clerk / school admin needs no approval.
+  function directEntryFields(){
+    var a = currentActor(), now = new Date().toISOString();
+    return { status: "approved", direct: true, enteredBy: a.name, enteredRole: a.role, enteredAt: now };
+  }
+
+  function addMessage(data, fromLabel, text){
+    data.messages.push({ id: uid("msg"), timestamp: new Date().toISOString(), from: fromLabel, text: text });
+  }
+  function unreadMessageCount(data){
+    if(!data.lastMessagesViewedAt) return data.messages.length;
+    return data.messages.filter(function(m){ return m.timestamp > data.lastMessagesViewedAt; }).length;
+  }
+
+  function teacherCollectionName(){
+    var sc = currentSchool();
+    if(!sc || !session.ledgerId) return "";
+    var col = (sc.data.collections || []).find(function(c){ return c.id === session.ledgerId; });
+    return col ? col.name : "";
+  }
+  function renderClassTeacherApp(school, cls){
+    var mainApp = document.getElementById("mainApp");
+    var ct = cls.classTeacher;
+    mainApp.innerHTML =
+      '<header class="topbar">' +
+        '<h1>'+esc(school.name)+' &mdash; '+esc(cls.name)+(teacherCollectionName() ? ' <span style="font-size:15px;opacity:.85;">('+esc(teacherCollectionName())+')</span>' : '')+'</h1>' +
+        '<div class="sub">Record the money paid by each learner on the date given.</div>' +
+        '<div class="top-row">' +
+          '<span class="signed-in">Signed in as <strong>'+esc(ct?ct.name:"Class Teacher")+'</strong><span class="role-badge">Class Teacher</span></span>' +
+          '<span class="save-note" id="saveNote"></span>' +
+          '<button class="btn secondary" id="logoutBtn">Switch user</button>' +
+        '</div>' +
+      '</header>' +
+      '<main id="content"></main>';
+    mainApp.querySelector("#logoutBtn").onclick = logout;
+    renderClassTeacherContent(cls);
+  }
+
+  function renderClassTeacherContent(cls){
+    var c = document.getElementById("content");
+    var term = cls.terms.find(function(t){ return t.id === cls.activeTermId; }) || cls.terms[cls.terms.length-1];
+
+    if(!term || cls.students.length === 0){
+      c.innerHTML = '<div class="empty-state"><strong>Nothing to record yet</strong>Ask the school admin to add students and start a term for this class first.</div>';
+      return;
+    }
+
+    if(!c.dataset.selectedDate) c.dataset.selectedDate = todayISO();
+    var selectedDate = c.dataset.selectedDate;
+
+    var ctTab = c.dataset.ctTab || "record";
+    var navHtml = '<nav class="tabs" id="ctTabs" style="padding:0;margin-bottom:18px;">' +
+      [["record","Record payments"],["paid","Learners who have paid"],["balances","Balances remaining"]].map(function(x){
+        return '<button data-ct-tab="'+x[0]+'" class="'+(ctTab===x[0]?"active":"")+'">'+x[1]+'</button>';
+      }).join("") + '</nav>';
+    function bindCtNav(){
+      c.querySelectorAll("[data-ct-tab]").forEach(function(b){
+        b.onclick = function(){ c.dataset.ctTab = b.getAttribute("data-ct-tab"); renderClassTeacherContent(cls); };
+      });
+    }
+
+    if(ctTab === "paid"){
+      var paidRows = cls.students.map(function(st){
+        var list = term.payments.filter(function(p){ return p.studentId === st.id && isCounted(p); });
+        var last = list.reduce(function(a,p){ return (!a || p.date > a) ? p.date : a; }, "");
+        return { st: st, paid: studentPaid(term, st.id), last: last, n: list.length };
+      }).filter(function(r){ return r.paid > 0; });
+      var ph = navHtml + '<h2 class="section-title">Learners who have paid &mdash; '+esc(term.label)+' '+termYear(term)+'</h2>' +
+        '<p class="section-hint">Only approved payments are counted here.</p>';
+      if(paidRows.length === 0){
+        ph += '<div class="empty-state"><strong>Nobody has paid yet this term</strong>Learners appear here once their payment is approved.</div>';
+      } else {
+        ph += '<div class="panel"><div class="table-wrap"><table><thead><tr><th style="width:34px">#</th><th>Adm No.</th><th>Learner</th><th class="num">Total paid this term</th><th class="num">Payments</th><th>Last payment</th></tr></thead><tbody>';
+        paidRows.forEach(function(r, i){
+          ph += '<tr><td>'+(i+1)+'</td><td>'+esc(r.st.adm||"")+'</td><td>'+esc(r.st.name)+'</td><td class="num">'+money(r.paid)+'</td><td class="num">'+r.n+'</td><td>'+esc(r.last)+'</td></tr>';
+        });
+        ph += '</tbody></table></div></div>';
+      }
+      c.innerHTML = ph;
+      bindCtNav();
+      return;
+    }
+
+    if(ctTab === "balances"){
+      var tt = termTotals(cls, term);
+      var bh = navHtml + '<h2 class="section-title">Balances remaining &mdash; '+esc(term.label)+' '+termYear(term)+'</h2>' +
+        '<p class="section-hint">Expected = previous term balance + this term\'s balance. Balance remaining = expected &minus; paid.</p>' +
+        '<div class="stat-grid">' +
+        '<div class="stat-box"><div class="label">Total expected</div><div class="value">'+money(tt.totalDue)+'</div></div>' +
+        '<div class="stat-box"><div class="label">Total paid</div><div class="value">'+money(tt.totalPaid)+'</div></div>' +
+        '<div class="stat-box"><div class="label">Total balance remaining</div><div class="value">'+money(tt.totalBalance)+'</div></div></div>' +
+        '<div class="panel"><div class="table-wrap"><table><thead><tr><th>Adm No.</th><th>Learner</th><th class="num">Previous term balance</th><th class="num">This term\'s balance</th><th class="num">Expected</th><th class="num">Paid</th><th class="num">Balance remaining</th></tr></thead><tbody>';
+      cls.students.forEach(function(st){
+        var due = studentDue(term, st.id), paid = studentPaid(term, st.id), bal = due - paid;
+        bh += '<tr><td>'+esc(st.adm||"")+'</td><td>'+esc(st.name)+'</td><td class="num">'+money(openingOf(term, st.id))+'</td><td class="num">'+money(chargeOf(term, st.id))+'</td>' +
+          '<td class="num">'+money(due)+'</td><td class="num">'+money(paid)+'</td>' +
+          '<td class="num '+(bal>0?"balance-owing":(bal<0?"balance-clear":""))+'">'+money(bal)+'</td></tr>';
+      });
+      bh += '</tbody></table></div></div>';
+      c.innerHTML = bh;
+      bindCtNav();
+      return;
+    }
+
+    var html = navHtml + '<h2 class="section-title">'+esc(term.label)+' '+termYear(term)+'</h2>' +
+      '<p class="section-hint">Pick the date, then enter the amount each learner paid that day. Leave blank for no payment. Saved automatically. Each amount is sent to the school admin / clerk and only counts once it is approved.</p>';
+
+    html += '<div class="panel"><div class="row"><div class="field"><label>Date</label><input type="date" id="ctDate" value="'+esc(selectedDate)+'"></div></div></div>';
+
+    var dayTotal = 0;
+    html += '<div class="panel"><div class="table-wrap"><table><thead><tr><th>Student</th><th class="num" style="width:160px;">Amount paid on this date</th><th style="width:150px;">Status</th></tr></thead><tbody>';
+    cls.students.forEach(function(st){
+      var existing = activePaymentFor(term, st.id, selectedDate);
+      var val = existing ? existing.amount : "";
+      var locked = !!(existing && isCounted(existing));
+      var statusText = existing ? paymentStatusText(existing) : (rejectedPaymentFor(term, st.id, selectedDate) ? "Rejected" : "");
+      if(locked) dayTotal += Number(existing.amount||0);
+      html += '<tr><td>'+esc(st.name)+'</td><td class="num"><input type="number" min="0" data-ct-student="'+st.id+'" value="'+esc(val)+'"'+(locked?' disabled':'')+' style="width:130px;text-align:right;"></td>' +
+        '<td data-ct-status="'+st.id+'">'+esc(statusText)+'</td></tr>';
+    });
+    html += '</tbody></table></div></div>';
+
+    var yr = termYear(term);
+    html += '<div class="stat-grid">' +
+      '<div class="stat-box"><div class="label">Total approved for '+esc(selectedDate)+'</div><div class="value" id="ctDayTotal">'+money(dayTotal)+'</div></div>' +
+      '<div class="stat-box"><div class="label">Awaiting approval (this term)</div><div class="value" id="ctPendingTotal">'+money(pendingTotalForTerm(term))+'</div></div>' +
+      '<div class="stat-box"><div class="label">Total collected this term</div><div class="value" id="ctTermTotal">'+money(termTotals(cls, term).totalPaid)+'</div></div>' +
+      '<div class="stat-box"><div class="label">Total collected in '+yr+'</div><div class="value" id="ctYearTotal">'+money(yearTotalForClass(cls, yr))+'</div></div>' +
+      '</div>';
+
+    var log = dailyTotalsForTerm(term);
+    html += '<div class="panel"><h3>Daily totals this term</h3>';
+    if(log.length === 0){
+      html += '<p class="section-hint" style="margin:0;">No payments recorded yet.</p>';
+    } else {
+      html += '<div class="table-wrap"><table><thead><tr><th>Date</th><th class="num">Total collected</th></tr></thead><tbody>';
+      log.forEach(function(row){ html += '<tr><td>'+esc(row.date)+'</td><td class="num">'+money(row.total)+'</td></tr>'; });
+      html += '</tbody></table></div>';
+    }
+    html += '</div>';
+
+    c.innerHTML = html;
+    bindCtNav();
+
+    c.querySelector("#ctDate").addEventListener("change", function(e){
+      c.dataset.selectedDate = e.target.value || todayISO();
+      renderClassTeacherContent(cls);
+    });
+
+    c.querySelectorAll("[data-ct-student]").forEach(function(inp){
+      inp.addEventListener("change", function(){
+        var studentId = inp.getAttribute("data-ct-student");
+        var amount = Number(inp.value) || 0;
+        var st = cls.students.find(function(s){ return s.id === studentId; });
+        var ct = cls.classTeacher;
+        var fromLabel = (ct ? ct.name : "Class teacher") + " (" + cls.name + (teacherCollectionName() ? " - " + teacherCollectionName() : "") + ")";
+        var result = upsertDatedPayment(term, studentId, selectedDate, amount, fromLabel, "Class Teacher");
+        if(result === "locked"){ renderClassTeacherContent(cls); return; }
+        var msgText = amount > 0
+          ? "Recorded " + money(amount) + " for " + (st?st.name:"a learner") + " on " + selectedDate + " - awaiting approval."
+          : "Cleared the payment for " + (st?st.name:"a learner") + " on " + selectedDate + ".";
+        addMessage(sdata(), fromLabel, msgText);
+        saveDB();
+        var statusCell = c.querySelector('[data-ct-status="'+studentId+'"]');
+        if(statusCell) statusCell.textContent = amount > 0 ? "Awaiting approval" : "";
+        var newDayTotal = 0;
+        term.payments.filter(function(p){ return p.date===selectedDate && isCounted(p); }).forEach(function(p){ newDayTotal += Number(p.amount||0); });
+        c.querySelector("#ctDayTotal").textContent = money(newDayTotal);
+        c.querySelector("#ctPendingTotal").textContent = money(pendingTotalForTerm(term));
+        c.querySelector("#ctTermTotal").textContent = money(termTotals(cls, term).totalPaid);
+        c.querySelector("#ctYearTotal").textContent = money(yearTotalForClass(cls, yr));
+      });
+    });
+  }
+
+
+  /* ---------------- Collections: committee accounts (treasurer, chairperson, members) ---------------- */
+
+  var COMMITTEE_ROLES = ["Treasurer","Chairperson","Committee member"];
+  function roleOptions(cur){
+    return COMMITTEE_ROLES.map(function(r){ return '<option value="'+esc(r)+'"'+(r===cur?" selected":"")+'>'+esc(r)+'</option>'; }).join("");
+  }
+
+  /* Clerk / school admin: create the committee accounts for the collection on screen. */
+  function renderCommittee(c){
+    var col = getCurrentCollection();
+    var html = '<h2 class="section-title">Committee &mdash; '+esc(col.name)+'</h2>' +
+      '<p class="section-hint">The treasurer, chairperson or any committee member can have an account that records payments for <strong>every class</strong> in this collection. They only get the same limited tabs as a class teacher (record payments, learners who have paid, balances remaining). Every amount they record waits here for the school admin or clerk to approve it on the Admin tab.</p>';
+
+    html += '<div class="panel"><h3>Add a committee account</h3><div class="row">' +
+      '<div class="field"><label>Name</label><input type="text" id="cmName" placeholder="e.g. Mr Otieno" style="width:170px;"></div>' +
+      '<div class="field"><label>Position</label><select id="cmRole">'+roleOptions("Treasurer")+'</select></div>' +
+      '<div class="field"><label>Username</label><input type="text" id="cmUser" placeholder="e.g. trip.treasurer" style="width:160px;"></div>' +
+      '<div class="field"><label>Password</label><input type="text" id="cmPass" placeholder="e.g. a strong password" style="width:160px;"></div>' +
+      '<button class="btn" id="cmAddBtn">Add account</button></div></div>';
+
+    var list = col.committee || [];
+    if(list.length === 0){
+      html += '<div class="empty-state"><strong>No committee accounts yet</strong>Add the treasurer, chairperson or a committee member above so they can record payments.</div>';
+    } else {
+      html += '<div class="panel"><h3>Committee accounts</h3><div class="table-wrap"><table><thead><tr><th>Name</th><th>Position</th><th>Username</th><th>Password</th><th style="width:50px"></th></tr></thead><tbody>';
+      list.forEach(function(m){
+        html += '<tr><td><input type="text" data-cm-name="'+m.id+'" value="'+esc(m.name)+'" style="width:100%"></td>' +
+          '<td><select data-cm-role="'+m.id+'">'+roleOptions(m.role)+'</select></td>' +
+          '<td><input type="text" data-cm-user="'+m.id+'" value="'+esc(m.username)+'" style="width:100%"></td>' +
+          '<td><input type="text" data-cm-pass="'+m.id+'" value="'+esc(m.password)+'" style="width:100%"></td>' +
+          '<td><button class="icon-x" data-cm-remove="'+m.id+'" title="Remove account">&times;</button></td></tr>';
+      });
+      html += '</tbody></table></div></div>';
+    }
+    c.innerHTML = html;
+
+    c.querySelector("#cmAddBtn").onclick = function(){
+      var name = c.querySelector("#cmName").value.trim();
+      var role = c.querySelector("#cmRole").value;
+      var user = c.querySelector("#cmUser").value.trim();
+      var pass = c.querySelector("#cmPass").value;
+      if(!name || !user || !pass){ alert("Please fill in the name, username and password."); return; }
+      if(isUsernameTaken(user)){ alert("That username is already in use by another account. Please choose another."); return; }
+      col.committee.push({ id: uid("cm"), name: name, role: role, username: user, password: pass });
+      saveDB();
+      renderClerkTab();
+    };
+    function member(id){ return col.committee.find(function(m){ return m.id === id; }); }
+    c.querySelectorAll("[data-cm-name]").forEach(function(inp){
+      inp.addEventListener("change", function(){ var m = member(inp.getAttribute("data-cm-name")); if(m){ m.name = inp.value.trim() || m.name; saveDB(); } });
+    });
+    c.querySelectorAll("[data-cm-role]").forEach(function(sel){
+      sel.addEventListener("change", function(){ var m = member(sel.getAttribute("data-cm-role")); if(m){ m.role = sel.value; saveDB(); } });
+    });
+    c.querySelectorAll("[data-cm-user]").forEach(function(inp){
+      inp.addEventListener("change", function(){
+        var m = member(inp.getAttribute("data-cm-user"));
+        if(!m) return;
+        var val = inp.value.trim();
+        if(!val){ inp.value = m.username; return; }
+        if(isUsernameTaken(val, m)){ alert("That username is already in use."); inp.value = m.username; return; }
+        m.username = val; saveDB();
+      });
+    });
+    c.querySelectorAll("[data-cm-pass]").forEach(function(inp){
+      inp.addEventListener("change", function(){ var m = member(inp.getAttribute("data-cm-pass")); if(m){ m.password = inp.value || m.password; saveDB(); } });
+    });
+    c.querySelectorAll("[data-cm-remove]").forEach(function(btn){
+      btn.onclick = function(){
+        var m = member(btn.getAttribute("data-cm-remove"));
+        if(!m || !confirm("Remove the account for "+m.name+" ("+m.role+")? They will no longer be able to sign in.")) return;
+        col.committee = col.committee.filter(function(x){ return x.id !== m.id; });
+        saveDB();
+        renderClerkTab();
+      };
+    });
+  }
+
+  /* Committee member's own screen: limited like the class teacher's, but covering every class in the collection. */
+  function renderCommitteeApp(school, col, member){
+    var mainApp = document.getElementById("mainApp");
+    mainApp.innerHTML =
+      '<header class="topbar">' +
+        '<h1>'+esc(school.name)+' &mdash; '+esc(col.name)+'</h1>' +
+        '<div class="sub">Record the money paid by learners in any class of this collection. Each amount counts once the school admin or clerk approves it.</div>' +
+        '<div class="top-row">' +
+          '<span class="signed-in">Signed in as <strong>'+esc(member.name)+'</strong><span class="role-badge">'+esc(member.role)+'</span></span>' +
+          '<span class="save-note" id="saveNote"></span>' +
+          '<button class="btn secondary" id="logoutBtn">Switch user</button>' +
+        '</div>' +
+      '</header>' +
+      '<main id="content"></main>';
+    mainApp.querySelector("#logoutBtn").onclick = logout;
+    renderCommitteeContent(col, member);
+  }
+
+  function renderCommitteeContent(col, member){
+    var c = document.getElementById("content");
+    var classes = (col.ledger.classes || []).filter(function(cl){ return cl.terms.length > 0; });
+    if(classes.length === 0 || !classes.some(function(cl){ return cl.students.length > 0; })){
+      c.innerHTML = '<div class="empty-state"><strong>Nothing to record yet</strong>Ask the school admin or clerk to add classes and learners to this collection first.</div>';
+      return;
+    }
+    function termOf(cl){ return cl.terms.find(function(t){ return t.id === cl.activeTermId; }) || cl.terms[cl.terms.length-1]; }
+    function nameOf(m){ return m.name + " (" + m.role + " - " + col.name + ")"; }
+
+    var tab = c.dataset.cmTab || "record";
+    var navHtml = '<nav class="tabs" style="padding:0;margin-bottom:18px;">' +
+      [["record","Record payments"],["paid","Learners who have paid"],["balances","Balances remaining"]].map(function(x){
+        return '<button data-cm-tab="'+x[0]+'" class="'+(tab===x[0]?"active":"")+'">'+x[1]+'</button>';
+      }).join("") + '</nav>';
+    function bindNav(){
+      c.querySelectorAll("[data-cm-tab]").forEach(function(b){
+        b.onclick = function(){ c.dataset.cmTab = b.getAttribute("data-cm-tab"); renderCommitteeContent(col, member); };
+      });
+    }
+    function classChoices(withAll, cur){
+      return (withAll ? '<option value="all"'+(cur==="all"?" selected":"")+'>All classes</option>' : '') +
+        classes.map(function(cl){ return '<option value="'+cl.id+'"'+(cl.id===cur?" selected":"")+'>'+esc(cl.name)+'</option>'; }).join("");
+    }
+
+    /* ---- learners who have paid / balances remaining (every class, or one) ---- */
+    if(tab === "paid" || tab === "balances"){
+      var filter = c.dataset.cmFilter || "all";
+      if(filter !== "all" && !classes.some(function(cl){ return cl.id === filter; })) filter = "all";
+      var shown = classes.filter(function(cl){ return filter === "all" || cl.id === filter; });
+      var h = navHtml + '<h2 class="section-title">'+(tab==="paid" ? "Learners who have paid" : "Balances remaining")+' &mdash; '+esc(col.name)+'</h2>' +
+        (tab==="paid" ? '<p class="section-hint">Only approved payments are counted here.</p>'
+                      : '<p class="section-hint">Expected = previous term balance + this term\'s balance. Balance remaining = expected &minus; paid.</p>') +
+        '<div class="row" style="margin-bottom:14px;"><div class="field"><label>Class</label><select id="cmFilter">'+classChoices(true, filter)+'</select></div></div>';
+      if(tab === "paid"){
+        var rows = [];
+        shown.forEach(function(cl){
+          var term = termOf(cl);
+          cl.students.forEach(function(st){
+            var list = term.payments.filter(function(p){ return p.studentId === st.id && isCounted(p); });
+            var paid = studentPaid(term, st.id);
+            if(paid > 0) rows.push({ cl: cl, st: st, paid: paid, n: list.length, last: list.reduce(function(a,p){ return (!a || p.date > a) ? p.date : a; }, "") });
+          });
+        });
+        if(rows.length === 0){
+          h += '<div class="empty-state"><strong>Nobody has paid yet</strong>Learners appear here once their payment is approved.</div>';
+        } else {
+          var tot = rows.reduce(function(a,r){ return a + r.paid; }, 0);
+          h += '<div class="panel"><div class="table-wrap"><table><thead><tr><th style="width:34px">#</th><th>Class</th><th>Adm No.</th><th>Learner</th><th class="num">Total paid</th><th class="num">Payments</th><th>Last payment</th></tr></thead><tbody>';
+          rows.forEach(function(r, i){
+            h += '<tr><td>'+(i+1)+'</td><td>'+esc(r.cl.name)+'</td><td>'+esc(r.st.adm||"")+'</td><td>'+esc(r.st.name)+'</td><td class="num">'+money(r.paid)+'</td><td class="num">'+r.n+'</td><td>'+esc(r.last)+'</td></tr>';
+          });
+          h += '<tr style="font-weight:700;background:var(--bg);"><td colspan="4">Total</td><td class="num">'+money(tot)+'</td><td colspan="2"></td></tr></tbody></table></div></div>';
+        }
+      } else {
+        var totDue = 0, totPaid = 0, body = '';
+        shown.forEach(function(cl){
+          var term = termOf(cl);
+          cl.students.forEach(function(st){
+            var due = studentDue(term, st.id), paid = studentPaid(term, st.id), bal = due - paid;
+            totDue += due; totPaid += paid;
+            body += '<tr><td>'+esc(cl.name)+'</td><td>'+esc(st.adm||"")+'</td><td>'+esc(st.name)+'</td><td class="num">'+money(openingOf(term, st.id))+'</td><td class="num">'+money(chargeOf(term, st.id))+'</td>' +
+              '<td class="num">'+money(due)+'</td><td class="num">'+money(paid)+'</td>' +
+              '<td class="num '+(bal>0?"balance-owing":(bal<0?"balance-clear":""))+'">'+money(bal)+'</td></tr>';
+          });
+        });
+        h += '<div class="stat-grid">' +
+          '<div class="stat-box"><div class="label">Total expected</div><div class="value">'+money(totDue)+'</div></div>' +
+          '<div class="stat-box"><div class="label">Total paid</div><div class="value">'+money(totPaid)+'</div></div>' +
+          '<div class="stat-box"><div class="label">Total balance remaining</div><div class="value">'+money(totDue-totPaid)+'</div></div></div>' +
+          '<div class="panel"><div class="table-wrap"><table><thead><tr><th>Class</th><th>Adm No.</th><th>Learner</th><th class="num">Previous term balance</th><th class="num">This term\'s balance</th><th class="num">Expected</th><th class="num">Paid</th><th class="num">Balance remaining</th></tr></thead><tbody>' +
+          body + '</tbody></table></div></div>';
+      }
+      c.innerHTML = h;
+      bindNav();
+      c.querySelector("#cmFilter").onchange = function(e){ c.dataset.cmFilter = e.target.value; renderCommitteeContent(col, member); };
+      return;
+    }
+
+    /* ---- record payments: pick the class and the date, then enter what each learner paid ---- */
+    var recClass = classes.find(function(cl){ return cl.id === c.dataset.cmClass; }) || classes.find(function(cl){ return cl.students.length; }) || classes[0];
+    var term = termOf(recClass);
+    if(!c.dataset.cmDate) c.dataset.cmDate = todayISO();
+    var date = c.dataset.cmDate;
+
+    var dayTotal = 0;
+    var html = navHtml + '<h2 class="section-title">Record payments &mdash; '+esc(recClass.name)+' &middot; '+esc(term.label)+' '+termYear(term)+'</h2>' +
+      '<p class="section-hint">Pick the class and the date, then enter the amount each learner paid that day. Leave blank for no payment. Saved automatically and sent to the school admin / clerk for approval.</p>' +
+      '<div class="panel"><div class="row">' +
+      '<div class="field"><label>Class</label><select id="cmClassSel">'+classChoices(false, recClass.id)+'</select></div>' +
+      '<div class="field"><label>Date</label><input type="date" id="cmDate" value="'+esc(date)+'"></div></div></div>';
+    if(recClass.students.length === 0){
+      html += '<div class="empty-state"><strong>No learners in '+esc(recClass.name)+' yet</strong>Ask the school admin or clerk to add them.</div>';
+      c.innerHTML = html;
+      bindNav();
+    } else {
+      html += '<div class="panel"><div class="table-wrap"><table><thead><tr><th>Adm No.</th><th>Learner</th><th class="num" style="width:160px;">Amount paid on this date</th><th style="width:150px;">Status</th></tr></thead><tbody>';
+      recClass.students.forEach(function(st){
+        var existing = activePaymentFor(term, st.id, date);
+        var locked = !!(existing && isCounted(existing));
+        var statusText = existing ? paymentStatusText(existing) : (rejectedPaymentFor(term, st.id, date) ? "Rejected" : "");
+        if(locked) dayTotal += Number(existing.amount||0);
+        html += '<tr><td>'+esc(st.adm||"")+'</td><td>'+esc(st.name)+'</td><td class="num"><input type="number" min="0" data-cm-student="'+st.id+'" value="'+esc(existing ? existing.amount : "")+'"'+(locked?' disabled':'')+' style="width:130px;text-align:right;"></td>' +
+          '<td data-cm-status="'+st.id+'">'+esc(statusText)+'</td></tr>';
+      });
+      html += '</tbody></table></div></div>';
+      var allPending = 0;
+      classes.forEach(function(cl){ allPending += pendingTotalForTerm(termOf(cl)); });
+      html += '<div class="stat-grid">' +
+        '<div class="stat-box"><div class="label">Approved for '+esc(date)+' ('+esc(recClass.name)+')</div><div class="value" id="cmDayTotal">'+money(dayTotal)+'</div></div>' +
+        '<div class="stat-box"><div class="label">Awaiting approval (all classes)</div><div class="value" id="cmPendingTotal">'+money(allPending)+'</div></div>' +
+        '<div class="stat-box"><div class="label">Collected this term ('+esc(recClass.name)+')</div><div class="value" id="cmTermTotal">'+money(termTotals(recClass, term).totalPaid)+'</div></div>' +
+        '</div>';
+      c.innerHTML = html;
+      bindNav();
+
+      c.querySelectorAll("[data-cm-student]").forEach(function(inp){
+        inp.addEventListener("change", function(){
+          var studentId = inp.getAttribute("data-cm-student");
+          var amount = Number(inp.value) || 0;
+          var st = recClass.students.find(function(x){ return x.id === studentId; });
+          var result = upsertDatedPayment(term, studentId, date, amount, nameOf(member), member.role);
+          if(result === "locked"){ renderCommitteeContent(col, member); return; }
+          addMessage(sdata(), nameOf(member), amount > 0
+            ? "Recorded " + money(amount) + " for " + (st?st.name:"a learner") + " (" + recClass.name + ") on " + date + " - awaiting approval."
+            : "Cleared the payment for " + (st?st.name:"a learner") + " (" + recClass.name + ") on " + date + ".");
+          saveDB();
+          var cell = c.querySelector('[data-cm-status="'+studentId+'"]');
+          if(cell) cell.textContent = amount > 0 ? "Awaiting approval" : "";
+          var pend = 0; classes.forEach(function(cl){ pend += pendingTotalForTerm(termOf(cl)); });
+          c.querySelector("#cmPendingTotal").textContent = money(pend);
+        });
+      });
+    }
+    c.querySelector("#cmClassSel").onchange = function(e){ c.dataset.cmClass = e.target.value; renderCommitteeContent(col, member); };
+    c.querySelector("#cmDate").addEventListener("change", function(e){ c.dataset.cmDate = e.target.value || todayISO(); renderCommitteeContent(col, member); });
+  }
+
+  /* ---------------- Teacher helpers ---------------- */
+
+  function teacherPaidInTerm(teacher, termLabel, year){
+    return teacher.payments.filter(function(p){ return p.term === termLabel && Number(p.year) === Number(year); })
+      .reduce(function(a,p){ return a+Number(p.amount||0); },0);
+  }
+  function teacherPaidTotal(teacher){
+    return teacher.payments.reduce(function(a,p){ return a+Number(p.amount||0); },0);
+  }
+  function allTeacherTermYearOptions(){
+    var seen = {}; var opts = [];
+    db.teachers.forEach(function(t){
+      t.payments.forEach(function(p){
+        var key = p.term + "||" + p.year;
+        if(!seen[key]){ seen[key]=true; opts.push({ term:p.term, year:p.year }); }
+      });
+    });
+    opts.sort(function(a,b){ return (b.year-a.year) || String(b.term).localeCompare(String(a.term)); });
+    return opts;
+  }
+  function allYearsInUse(){
+    var years = {};
+    db.classes.forEach(function(c){ c.terms.forEach(function(t){ years[termYear(t)] = true; }); });
+    db.terms.forEach(function(t){ years[termYear(t)] = true; });
+    db.teachers.forEach(function(t){ t.payments.forEach(function(p){ years[Number(p.year)||new Date().getFullYear()] = true; }); });
+    var list = Object.keys(years).map(Number);
+    if(list.length===0) list.push(new Date().getFullYear());
+    list.sort(function(a,b){ return b-a; });
+    return list;
+  }
+
+  /* ---------------- Collections helpers ---------------- */
+
+  function makeCollection(name){ return { id: uid("col"), name: name, committee: [], ledger: newLedger() }; }
+  function getCurrentCollection(){
+    var sd = sdata();
+    if(!sd || !sd.collections.length) return null;
+    var found = sd.collections.find(function(c){ return c.id === sd.activeCollectionId; });
+    if(found) return found;
+    sd.activeCollectionId = sd.collections[0].id;
+    saveDB();
+    return sd.collections[0];
+  }
+  /* The remedial ledger lives in the school's own data; each collection has its own ledger. `db` always points at the ledger on screen. */
+  var emptyLedger = newLedger();
+  function useLedger(){
+    var sd = sdata();
+    if(!sd) return;
+    if(currentSection === "collections"){
+      var col = getCurrentCollection();
+      db = col ? col.ledger : emptyLedger;
+    } else {
+      db = sd;
+    }
+  }
+
+  /* ---------------- Shell ---------------- */
+
+  function field(label,id,type,value,placeholder,width){
+    return '<div class="field"><label for="'+id+'">'+esc(label)+'</label>' +
+      '<input type="'+type+'" id="'+id+'" value="'+esc(value)+'" placeholder="'+esc(placeholder||"")+'"'+(width?' style="width:'+width+'"':'')+'></div>';
+  }
+
+  function renderClerkShell(){
+    var school = currentSchool();
+    useLedger();
+    var mainApp = document.getElementById("mainApp");
+    var superBanner = session.superOwner
+      ? '<div class="no-print" style="background:#3B2F0B;color:#FFF3CF;padding:10px 20px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;border-bottom:3px solid var(--accent);font-size:13.5px;">' +
+        '<span>You are inside <strong>'+esc(school.name)+'</strong> as the platform super admin. Whatever you change here is saved in the school.</span>' +
+        '<button class="btn secondary" id="backToPlatformBtn" style="padding:6px 14px;">Back to platform admin</button></div>'
+      : '';
+    mainApp.innerHTML = superBanner +
+      '<header class="topbar">' +
+        '<h1 id="schoolNameDisplay">'+esc(school.name)+'</h1>' +
+        '<div class="sub">Track expected fees, weekly &amp; monthly payments, carried-forward balances, staff pay, and other school collections.</div>' +
+        '<div class="top-row">' +
+          '<span class="signed-in">Signed in as <strong>'+esc(currentActor().name)+'</strong><span class="role-badge">'+(session.superOwner ? "Platform Super Admin" : (session.role==="schooladmin" ? "School Admin" : "School Clerk"))+'</span></span>' +
+          '<span class="save-note" id="saveNote"></span>' +
+          '<button class="btn secondary" id="messagesBtn">Messages'+(unreadMessageCount(school.data)>0 ? ' <span class="tag">'+unreadMessageCount(school.data)+'</span>' : '')+'</button>' +
+          '<button class="btn secondary" id="logoutBtn">Switch user</button>' +
+        '</div>' +
+        '<div class="section-toggle" id="sectionToggle">' +
+          '<button data-section="remedial" class="'+(currentSection==="remedial"?"active":"")+'">Remedial Ledger</button>' +
+          '<button data-section="collections" class="'+(currentSection==="collections"?"active":"")+'">Other Collections</button>' +
+        '</div>' +
+        '<div class="class-bar" id="collectionBar"></div>' +
+        '<div class="class-bar" id="classBar"></div>' +
+        '<div class="term-bar" id="termBar"></div>' +
+        '<div class="term-bar" id="instituteBar"></div>' +
+      '</header>' +
+      '<nav class="tabs" id="tabs"></nav>' +
+      '<main id="content"></main>';
+
+    mainApp.querySelector("#logoutBtn").onclick = logout;
+    var backBtn = mainApp.querySelector("#backToPlatformBtn");
+    if(backBtn){
+      backBtn.onclick = function(){
+        session = { role:"superadmin", schoolId:null, classId:null, token: session.token };
+        saveSession();
+        startApp();
+      };
+    }
+    mainApp.querySelector("#messagesBtn").onclick = function(){
+      currentTab = "messages";
+      renderClerkTab();
+    };
+    mainApp.querySelector("#sectionToggle").querySelectorAll("button").forEach(function(btn){
+      btn.onclick = function(){
+        currentSection = btn.getAttribute("data-section");
+        currentTab = "students";
+        renderClerkShell();
+        renderClerkTab();
+      };
+    });
+
+    document.getElementById("collectionBar").innerHTML = "";
+    if(currentSection === "remedial") renderRemedialBars();
+    else {
+      renderCollectionsBar();
+      if(getCurrentCollection()) renderRemedialBars();
+      else {
+        document.getElementById("classBar").innerHTML = "";
+        document.getElementById("termBar").innerHTML = "";
+        document.getElementById("instituteBar").innerHTML = "";
+      }
+    }
+
+    renderTabsNav();
+  }
+
+  function renderRemedialBars(){
+    var classBar = document.getElementById("classBar");
+    var cls = getCurrentClass();
+    var html = db.classes.map(function(c){
+      return '<button class="class-pill'+(cls && c.id===cls.id?" active":"")+'" data-class-id="'+c.id+'">'+esc(c.name)+'</button>';
+    }).join("");
+    html += '<div class="add-form"><input type="text" id="newClassName" placeholder="e.g. JSS 1 Remedial"><button class="btn" id="addClassBtn">+ Add class</button></div>';
+    classBar.innerHTML = html;
+
+    classBar.querySelectorAll("[data-class-id]").forEach(function(btn){
+      btn.onclick = function(){
+        db.activeClassId = btn.getAttribute("data-class-id");
+        saveDB();
+        renderClerkShell();
+        renderClerkTab();
+      };
+    });
+    classBar.querySelector("#addClassBtn").onclick = function(){
+      var inp = classBar.querySelector("#newClassName");
+      var name = inp.value.trim();
+      if(!name) return;
+      var c = makeClass(name);
+      db.classes.push(c);
+      db.activeClassId = c.id;
+      saveDB();
+      currentTab = "students";
+      renderClerkShell();
+      renderClerkTab();
+    };
+
+    var termBar = document.getElementById("termBar");
+    if(!cls){
+      termBar.innerHTML = '<span class="signed-in">No classes yet - add one above.</span>';
+    } else {
+      var term = getCurrentTerm(cls);
+      var latestYear0 = termYear(cls.terms[cls.terms.length-1]);
+      var t = '<div class="field"><label>Term (for '+esc(cls.name)+')</label><select id="termSelect">' +
+        cls.terms.map(function(x){ return '<option value="'+x.id+'"'+(x.id===term.id?" selected":"")+'>'+esc(x.label)+' '+termYear(x)+'</option>'; }).join("") +
+        '</select></div>' +
+        '<button class="btn secondary" id="editTermBtn">Edit term</button>' +
+        '<button class="btn danger" id="deleteTermBtn">Delete term</button>' +
+        '<button class="btn secondary" id="editClassBtn">Edit class</button>' +
+        '<button class="btn danger" id="deleteClassBtn">Delete class</button>';
+      t += '<div class="field"><label>New term for '+esc(cls.name)+'</label><input type="text" id="newClassTermLabel" placeholder="e.g. Term 2" style="width:120px"></div>' +
+        '<div class="field"><label>Year</label><input type="number" id="newClassTermYear" value="'+latestYear0+'" style="width:90px"></div>' +
+        '<div class="field"><label>Term balance per learner (optional)</label><input type="number" id="newClassTermFee" placeholder="e.g. 1000" style="width:170px"></div>' +
+        '<button class="btn" id="createClassTermBtn">Create term for '+esc(cls.name)+'</button>';
+      termBar.innerHTML = t;
+
+      termBar.querySelector("#termSelect").onchange = function(e){
+        cls.activeTermId = e.target.value;
+        saveDB();
+        renderClerkShell();
+        renderClerkTab();
+      };
+      termBar.querySelector("#editTermBtn").onclick = function(){
+        var label = window.prompt("Term name:", term.label);
+        if(label === null) return;
+        label = label.trim();
+        if(!label) return;
+        var yr = window.prompt("Year:", termYear(term));
+        if(yr === null) return;
+        yr = Number(yr);
+        if(!yr){ alert("Please enter a valid year."); return; }
+        if(cls.terms.some(function(x){ return x.id !== term.id && x.label.toLowerCase() === label.toLowerCase() && termYear(x) === yr; })){ alert("This class already has that term."); return; }
+        term.label = label; term.year = yr;
+        getOrCreateSchoolTerm(db, label, yr);
+        saveDB();
+        renderClerkShell();
+        renderClerkTab();
+      };
+      termBar.querySelector("#deleteTermBtn").onclick = function(){
+        if(cls.terms.length <= 1){ alert("A class must keep at least one term. Create another term first, or edit this one instead."); return; }
+        if(!confirm('Delete "'+term.label+' '+termYear(term)+'" for '+cls.name+'? Its payments and learner balances for this term will be removed. This cannot be undone.')) return;
+        cls.terms = cls.terms.filter(function(x){ return x.id !== term.id; });
+        cls.activeTermId = cls.terms[cls.terms.length-1].id;
+        saveDB();
+        renderClerkShell();
+        renderClerkTab();
+      };
+      termBar.querySelector("#editClassBtn").onclick = function(){
+        var name = window.prompt("Class name:", cls.name);
+        if(name === null) return;
+        name = name.trim();
+        if(!name) return;
+        cls.name = name;
+        saveDB();
+        renderClerkShell();
+        renderClerkTab();
+      };
+      termBar.querySelector("#deleteClassBtn").onclick = function(){
+        if(!confirm('Delete the class "'+cls.name+'" with its '+cls.students.length+' learner(s), all its terms and payments? This cannot be undone.')) return;
+        db.classes = db.classes.filter(function(x){ return x.id !== cls.id; });
+        db.activeClassId = null;
+        saveDB();
+        currentTab = "students";
+        renderClerkShell();
+        renderClerkTab();
+      };
+      termBar.querySelector("#createClassTermBtn").onclick = function(){
+        var label = termBar.querySelector("#newClassTermLabel").value.trim();
+        var yr = Number(termBar.querySelector("#newClassTermYear").value) || latestYear0;
+        var fee = Number(termBar.querySelector("#newClassTermFee").value) || 0;
+        if(!label){ alert("Type the name of the new term, e.g. Term 2."); return; }
+        if(cls.terms.some(function(x){ return x.label.toLowerCase() === label.toLowerCase() && termYear(x) === yr; })){ alert("This class already has that term."); return; }
+        if(!confirm('Create "'+label+' '+yr+'" for '+cls.name+'? Each learner\'s unpaid balance will carry forward as their previous term balance.')) return;
+        createTermForClass(cls, label, yr, fee);
+        saveDB();
+        renderClerkShell();
+        renderClerkTab();
+      };
+    }
+
+    var instituteBar = document.getElementById("instituteBar");
+    var latestLabel = "Term 2", latestYear = new Date().getFullYear();
+    if(db.activeSchoolTermKey){
+      var parts = db.activeSchoolTermKey.split("||");
+      latestYear = Number(parts[1]) || latestYear;
+    }
+    instituteBar.innerHTML =
+      '<div class="add-form" style="margin-left:0;"><input type="text" id="newTeacherName" placeholder="e.g. Mr Otieno"><button class="btn" id="addTeacherBtn">+ Add teacher</button></div>' +
+      '<div class="field"><label>New term label (whole school)</label><input type="text" id="newSchoolTermLabel" placeholder="e.g. Term 2" style="width:130px"></div>' +
+      '<div class="field"><label>Year</label><input type="number" id="newSchoolTermYear" value="'+latestYear+'" style="width:90px"></div>' +
+      '<div class="field"><label>Term balance per learner (optional)</label><input type="number" id="newSchoolTermAmount" placeholder="e.g. 1000" style="width:170px"></div>' +
+      '<button class="btn secondary" id="newSchoolTermBtn">Start new term for whole school</button>';
+
+    instituteBar.querySelector("#addTeacherBtn").onclick = function(){
+      var inp = instituteBar.querySelector("#newTeacherName");
+      var name = inp.value.trim();
+      if(!name) return;
+      db.teachers.push({ id: uid("tch"), name: name, payments: [] });
+      saveDB();
+      currentTab = "teachers";
+      renderClerkShell();
+      renderClerkTab();
+    };
+    instituteBar.querySelector("#newSchoolTermBtn").onclick = function(){
+      var label = instituteBar.querySelector("#newSchoolTermLabel").value.trim() || "New Term";
+      var year = instituteBar.querySelector("#newSchoolTermYear").value || latestYear;
+      var amount = instituteBar.querySelector("#newSchoolTermAmount").value || 0;
+      if(!confirm('Start "'+label+' '+year+'" for every class in the school? Each class\'s outstanding balance will carry forward automatically.')) return;
+      startNewTermForSchool(label, year, amount);
+      renderClerkShell();
+      renderClerkTab();
+    };
+  }
+
+  /* The row of collections. Picking one opens that collection's own ledger (classes, learners, terms, payments...) below it. */
+  function renderCollectionsBar(){
+    var bar = document.getElementById("collectionBar");
+    var sd = sdata();
+    var col = getCurrentCollection();
+    var html = '<span class="signed-in" style="margin-right:4px;">Collections:</span>' + sd.collections.map(function(c){
+      var pend = ledgerPendingCount(c.ledger);
+      return '<button class="class-pill'+(col && c.id===col.id?" active":"")+'" data-collection-id="'+c.id+'">'+esc(c.name)+(pend ? ' ('+pend+')' : '')+'</button>';
+    }).join("");
+    if(col){
+      html += '<button class="btn secondary" id="editCollectionBtn" style="padding:6px 12px;">Edit collection</button>' +
+        '<button class="btn danger" id="deleteCollectionBtn" style="padding:6px 12px;">Delete collection</button>';
+    }
+    html += '<div class="add-form"><input type="text" id="newCollectionName" placeholder="Name a new collection, e.g. Trip Fund">' +
+      '<button class="btn" id="addCollectionBtn">+ Add collection</button></div>';
+    bar.innerHTML = html;
+
+    bar.querySelectorAll("[data-collection-id]").forEach(function(btn){
+      btn.onclick = function(){
+        sd.activeCollectionId = btn.getAttribute("data-collection-id");
+        saveDB();
+        currentTab = "students";
+        renderClerkShell();
+        renderClerkTab();
+      };
+    });
+    bar.querySelector("#addCollectionBtn").onclick = function(){
+      var inp = bar.querySelector("#newCollectionName");
+      var name = inp.value.trim();
+      if(!name) return;
+      var c = makeCollection(name);
+      sd.collections.push(c);
+      sd.activeCollectionId = c.id;
+      saveDB();
+      currentTab = "students";
+      renderClerkShell();
+      renderClerkTab();
+    };
+    var editBtn = bar.querySelector("#editCollectionBtn");
+    if(editBtn){
+      editBtn.onclick = function(){
+        var name = window.prompt("Collection name:", col.name);
+        if(name === null) return;
+        name = name.trim();
+        if(!name) return;
+        col.name = name;
+        saveDB();
+        renderClerkShell();
+        renderClerkTab();
+      };
+      bar.querySelector("#deleteCollectionBtn").onclick = function(){
+        if(!confirm('Delete the collection "'+col.name+'" with all its classes, learners, terms and payments? This cannot be undone.')) return;
+        sd.collections = sd.collections.filter(function(x){ return x.id !== col.id; });
+        sd.activeCollectionId = null;
+        saveDB();
+        currentTab = "students";
+        renderClerkShell();
+        renderClerkTab();
+      };
+    }
+  }
+
+  function renderTabsNav(){
+    var pend = ledgerPendingCount(db);
+    var tabDefs = [
+      {id:"students", label:"Students"},
+      {id:"payments", label:"Payments"},
+      {id:"summary", label:"Summary"},
+      {id:"expenses", label:(currentSection === "remedial" ? "Remedial Expenses" : "Expenses")},
+      {id:"teachers", label:"Teachers"},
+      {id:"yearsummary", label:"Year Summary"}
+    ];
+    if(currentSection === "collections") tabDefs.push({id:"committee", label:"Committee"});
+    tabDefs.push({id:"admin", label:"Admin" + (pend ? " (" + pend + ")" : "")});
+    var tabsEl = document.getElementById("tabs");
+    tabsEl.innerHTML = tabDefs.map(function(t){
+      return '<button data-tab="'+t.id+'" class="'+(t.id===currentTab?"active":"")+'">'+esc(t.label)+'</button>';
+    }).join("");
+    tabsEl.querySelectorAll("button").forEach(function(btn){
+      btn.onclick = function(){ currentTab = btn.dataset.tab; renderClerkTab(); };
+    });
+  }
+
+  function renderClerkTab(){
+    useLedger();
+    document.querySelectorAll("#tabs button").forEach(function(btn){
+      btn.classList.toggle("active", btn.dataset.tab === currentTab);
+    });
+    var c = document.getElementById("content");
+
+    if(currentTab === "messages"){ renderMessages(c); return; }
+    if(currentTab === "admin"){ renderAdmin(c); return; }
+    if(currentSection === "collections" && !getCurrentCollection()){
+      c.innerHTML = '<div class="empty-state"><strong>No collections yet</strong>Use the "+ Add collection" box above to name and create one, e.g. "Trip Fund" or "Building Fund". Each collection has its own classes, learners, terms and payments, kept completely apart from the Remedial Ledger and from every other collection.</div>';
+      return;
+    }
+
+    if(currentTab === "committee" && currentSection === "collections"){ renderCommittee(c); return; }
+    if(currentTab === "teachers"){ renderTeachers(c); return; }
+    if(currentTab === "yearsummary"){ renderYearSummary(c); return; }
+    if(currentTab === "expenses"){ renderExpenses(c); return; }
+
+    var cls = getCurrentClass();
+    if(!cls){
+      c.innerHTML = '<div class="empty-state"><strong>No classes yet</strong>Use the "+ Add class" box above to create your first class'+(currentSection === "remedial" ? " in the remedial ledger" : " in this collection")+'.</div>';
+      return;
+    }
+    var term = getCurrentTerm(cls);
+    if(currentTab === "students") renderStudents(c, cls);
+    else if(currentTab === "payments") renderPayments(c, cls, term);
+    else if(currentTab === "summary") renderSummary(c, cls, term);
+  }
+
+  function renderMessages(c){
+    var html = '<h2 class="section-title">Messages</h2>' +
+      '<p class="section-hint">Whenever a class teacher records or changes a payment, or a payment is approved or rejected, a message appears here. Messages stay on this page permanently, even after they have been read.</p>';
+
+    var sd = sdata();
+    if(!sd.messages.length){
+      html += '<div class="empty-state"><strong>No messages yet</strong>Updates made by class teachers will show up here.</div>';
+      c.innerHTML = html;
+      return;
+    }
+
+    html += '<div class="toolbar" style="text-align:right;margin-bottom:14px;"><button class="btn secondary" id="markAllReadBtn">Mark all as read</button></div>';
+    html += '<div class="panel"><div class="table-wrap"><table><thead><tr><th style="width:70px;"></th><th>When</th><th>From</th><th>Message</th></tr></thead><tbody>';
+    var lastViewed = sd.lastMessagesViewedAt;
+    var sorted = sd.messages.slice().sort(function(a,b){ return b.timestamp.localeCompare(a.timestamp); });
+    sorted.forEach(function(m){
+      var isNew = !lastViewed || m.timestamp > lastViewed;
+      html += '<tr>' +
+        '<td>'+(isNew ? '<span class="tag">New</span>' : '')+'</td>' +
+        '<td>'+esc(new Date(m.timestamp).toLocaleString())+'</td>' +
+        '<td>'+esc(m.from)+'</td>' +
+        '<td>'+esc(m.text)+'</td>' +
+        '</tr>';
+    });
+    html += '</tbody></table></div></div>';
+
+    c.innerHTML = html;
+
+    c.querySelector("#markAllReadBtn").onclick = function(){
+      sd.lastMessagesViewedAt = new Date().toISOString();
+      saveDB();
+      renderClerkShell();
+      renderClerkTab();
+    };
+  }
+
+  /* ---------------- Students ---------------- */
+
+  function renderStudents(c, cls){
+    var otherClasses = db.classes.filter(function(x){ return x.id !== cls.id; });
+
+    var term = getCurrentTerm(cls);
+    var html = '<h2 class="section-title">Students &mdash; '+esc(cls.name)+'</h2>' +
+      '<p class="section-hint">Add every learner who attends this remedial class. Their fee balance carries forward automatically whenever a new term is started, or when they move to another class.</p>';
+
+    var ct = cls.classTeacher;
+    html += '<div class="panel"><h3>Class teacher</h3>' +
+      '<p class="section-hint" style="margin-bottom:10px;">Assign the one class teacher allowed to log in for '+esc(cls.name)+'. They can only record the money paid on a given date - nothing else in the app is available to them.</p>' +
+      '<div class="row">' +
+      '<div class="field"><label>Name</label><input type="text" id="ctName" value="'+esc(ct?ct.name:"")+'" placeholder="e.g. Mrs Achieng" style="width:180px;"></div>' +
+      '<div class="field"><label>Username</label><input type="text" id="ctUsername" value="'+esc(ct?ct.username:"")+'" placeholder="e.g. jss1.teacher" style="width:160px;"></div>' +
+      '<div class="field"><label>Password</label><input type="text" id="ctPassword" value="'+esc(ct?ct.password:"")+'" placeholder="e.g. a strong password" style="width:160px;"></div>' +
+      '<button class="btn" id="saveClassTeacherBtn">'+(ct?"Update class teacher":"Assign class teacher")+'</button>' +
+      (ct ? '<button class="btn danger" id="removeClassTeacherBtn">Remove</button>' : '') +
+      '</div></div>';
+
+    html += '<div class="panel"><h3>Add students</h3>' +
+      '<p class="section-hint" style="margin-bottom:14px;">Choose either option to add learners to '+esc(cls.name)+'.</p>' +
+      '<div style="display:flex;gap:24px;flex-wrap:wrap;">' +
+      '<div style="flex:1;min-width:260px;">' +
+        '<h4 style="margin:0 0 8px;color:var(--primary);font-size:14px;">Option 1: Add manually</h4>' +
+        '<div class="row">' +
+        '<div class="field"><label>Admission number</label><input type="text" id="newStudentAdm" placeholder="e.g. 1024" style="width:110px"></div>' +
+        '<div class="field"><label>Full name</label><input type="text" id="newStudentName" placeholder="e.g. Amina Wanjiru"></div>' +
+        '<div class="field"><label>Gender</label><select id="newStudentGender"><option value="">- select -</option><option value="Male">Male</option><option value="Female">Female</option></select></div>' +
+        '<div class="field"><label>Previous term balance</label><input type="number" id="newStudentOpen" placeholder="0" style="width:130px"></div>' +
+        '<div class="field"><label>'+esc(term.label)+' '+termYear(term)+' balance</label><input type="number" id="newStudentTermBal" value="'+(term.defaultFee||"")+'" placeholder="0" style="width:130px"></div>' +
+        '<button class="btn" id="addStudentBtn">Add student</button>' +
+        '</div>' +
+        '<p class="section-hint" style="margin:8px 0 0;">Expected amount is worked out automatically: previous term balance + '+esc(term.label)+' balance.</p>' +
+      '</div>' +
+      '<div style="flex:1;min-width:280px;border-left:1px solid var(--line);padding-left:24px;">' +
+        '<h4 style="margin:0 0 8px;color:var(--primary);font-size:14px;">Option 2: Add from a photo</h4>' +
+        '<p class="section-hint" style="margin:0 0 10px;">Upload a photo of a class list (e.g. a register page). Names found in it are shown below for you to check and edit before they are added.</p>' +
+        '<div class="row">' +
+        '<div class="field"><label>Photo of the list</label><input type="file" id="rosterPhotoInput" accept="image/*"></div>' +
+        '<button class="btn secondary" id="extractNamesBtn">Extract names from photo</button>' +
+        '</div>' +
+        '<p class="section-hint" id="ocrStatus" style="margin:10px 0 0;"></p>' +
+        '<div id="ocrResults"></div>' +
+      '</div>' +
+      '</div></div>';
+
+    if(otherClasses.length){
+      html += '<div class="panel"><h3>Promote whole class</h3><p class="section-hint" style="margin-bottom:10px;">Move every learner currently in '+esc(cls.name)+' to another class (e.g. at the end of the year). Each learner\'s balance moves with them.</p>' +
+        '<div class="row"><div class="field"><label>Move all to</label><select id="promoteAllTarget">' +
+        otherClasses.map(function(x){ return '<option value="'+x.id+'">'+esc(x.name)+'</option>'; }).join("") +
+        '</select></div><button class="btn secondary" id="promoteAllBtn">Promote entire class</button></div></div>';
+    }
+
+    if(cls.students.length === 0){
+      html += '<div class="empty-state"><strong>No students added yet</strong>Add learners above before recording payments.</div>';
+    } else {
+      html += '<div class="panel"><h3>Learners &mdash; '+esc(term.label)+' '+termYear(term)+'</h3><div class="table-wrap"><table><thead><tr><th style="width:34px">#</th><th style="width:100px">Adm No.</th><th>Name</th><th style="width:110px">Gender</th>' +
+        '<th class="num" style="width:130px">Previous term balance</th><th class="num" style="width:130px">'+esc(term.label)+' balance</th><th class="num" style="width:120px">Expected (auto)</th>' +
+        (otherClasses.length ? '<th>Move to class</th>' : '') +
+        '<th>Repeat</th><th>Transfer</th><th style="width:50px"></th></tr></thead><tbody>';
+      cls.students.forEach(function(st,i){
+        html += '<tr><td>'+(i+1)+'</td>' +
+          '<td><input type="text" data-student-adm="'+st.id+'" value="'+esc(st.adm||"")+'" style="width:100%"></td>' +
+          '<td><input type="text" data-student-name="'+st.id+'" value="'+esc(st.name)+'" style="width:100%">'+(st.repeating?'<span class="tag">Repeating</span>':'')+'</td>' +
+          '<td><select data-student-gender="'+st.id+'"><option value="">-</option><option value="Male"'+(st.gender==="Male"?" selected":"")+'>Male</option><option value="Female"'+(st.gender==="Female"?" selected":"")+'>Female</option></select></td>' +
+          '<td class="num"><input type="number" data-open-bal="'+st.id+'" value="'+(openingOf(term, st.id)||"")+'" placeholder="0" style="width:110px;text-align:right;"></td>' +
+          '<td class="num"><input type="number" data-term-bal="'+st.id+'" value="'+(chargeOf(term, st.id)||"")+'" placeholder="0" style="width:110px;text-align:right;"></td>' +
+          '<td class="num" data-expected="'+st.id+'"><strong>'+money(studentDue(term, st.id))+'</strong></td>';
+        if(otherClasses.length){
+          html += '<td><div style="display:flex;gap:6px;"><select data-move-target="'+st.id+'">' +
+            otherClasses.map(function(x){ return '<option value="'+x.id+'">'+esc(x.name)+'</option>'; }).join("") +
+            '</select><button class="btn secondary" data-move-btn="'+st.id+'" style="padding:5px 10px;">Move</button></div></td>';
+        }
+        html += '<td><button class="btn secondary" data-toggle-repeat="'+st.id+'" style="padding:5px 10px;">'+(st.repeating?"Unmark":"Repeating")+'</button></td>' +
+          '<td><button class="btn secondary" data-transfer-out="'+st.id+'" style="padding:5px 10px;">Transferred out</button></td>' +
+          '<td><button class="icon-x" data-remove-student="'+st.id+'" title="Remove student">&times;</button></td></tr>';
+      });
+      html += '</tbody></table></div></div>';
+    }
+
+    if(cls.transfersOut && cls.transfersOut.length){
+      html += '<div class="panel"><h3>Transferred out of '+esc(cls.name)+'</h3><div class="table-wrap"><table><thead><tr><th>Date</th><th>Name</th><th>Destination school</th><th style="width:50px"></th></tr></thead><tbody>';
+      cls.transfersOut.slice().sort(function(a,b){return b.date.localeCompare(a.date);}).forEach(function(tr){
+        html += '<tr><td>'+esc(tr.date)+'</td><td>'+esc(tr.name)+'</td><td>'+esc(tr.destination)+'</td>' +
+          '<td><button class="icon-x" data-remove-transfer="'+tr.id+'" title="Remove record">&times;</button></td></tr>';
+      });
+      html += '</tbody></table></div></div>';
+    }
+
+    c.innerHTML = html;
+
+    c.querySelector("#saveClassTeacherBtn").onclick = function(){
+      var name = c.querySelector("#ctName").value.trim();
+      var username = c.querySelector("#ctUsername").value.trim();
+      var password = c.querySelector("#ctPassword").value;
+      if(!name || !username || !password){ alert("Please fill in the class teacher's name, username and password."); return; }
+      if(isUsernameTaken(username, cls.classTeacher)){ alert("That username is already in use by another account. Please choose another."); return; }
+      cls.classTeacher = { name:name, username:username, password:password };
+      saveDB();
+      renderClerkTab();
+    };
+    var removeCtBtn = c.querySelector("#removeClassTeacherBtn");
+    if(removeCtBtn){
+      removeCtBtn.onclick = function(){
+        if(!confirm("Remove the class teacher account for "+cls.name+"? They will no longer be able to sign in.")) return;
+        cls.classTeacher = null;
+        saveDB();
+        renderClerkTab();
+      };
+    }
+
+    c.querySelector("#addStudentBtn").onclick = function(){
+      var inp = c.querySelector("#newStudentName");
+      var name = inp.value.trim();
+      if(!name) return;
+      addStudentToClass(cls, name,
+        c.querySelector("#newStudentAdm").value.trim(),
+        c.querySelector("#newStudentGender").value,
+        Number(c.querySelector("#newStudentOpen").value) || 0,
+        c.querySelector("#newStudentTermBal").value);
+      saveDB();
+      renderClerkTab();
+    };
+
+    c.querySelector("#extractNamesBtn").onclick = function(){
+      var fileInput = c.querySelector("#rosterPhotoInput");
+      var statusEl = c.querySelector("#ocrStatus");
+      var resultsEl = c.querySelector("#ocrResults");
+      var file = fileInput.files && fileInput.files[0];
+      if(!file){ statusEl.textContent = "Please choose a photo first."; return; }
+      statusEl.textContent = "Loading the text reader...";
+      resultsEl.innerHTML = "";
+      ensureTesseract(function(){
+        statusEl.textContent = "Reading names from the photo - this can take a few seconds...";
+        window.Tesseract.recognize(file, "eng").then(function(result){
+          var text = (result && result.data && result.data.text) || "";
+          var names = text.split(/\r?\n/)
+            .map(function(l){ return l.replace(/^[\s\d\.\)\-\u2022]+/, "").trim(); })
+            .filter(function(l){ return l.length >= 2 && /[a-zA-Z]/.test(l); });
+          if(names.length === 0){
+            statusEl.textContent = "No names could be read from that photo. Try a clearer, well-lit photo, or add students manually.";
+            return;
+          }
+          statusEl.textContent = "Found "+names.length+" possible name(s). Review and edit below, untick any that are not names, then add.";
+          renderOcrCandidates(cls, names, resultsEl);
+        }).catch(function(){
+          statusEl.textContent = "Could not read that photo. Please try again with a clearer photo, or add students manually.";
+        });
+      }, function(){
+        statusEl.textContent = "Could not load the photo-reading tool - check your internet connection, or add students manually.";
+      });
+    };
+
+    c.querySelectorAll("[data-student-adm]").forEach(function(inp){
+      inp.addEventListener("change", function(){
+        var st = cls.students.find(function(s){ return s.id === inp.getAttribute("data-student-adm"); });
+        if(st){ st.adm = inp.value.trim(); saveDB(); }
+      });
+    });
+    c.querySelectorAll("[data-student-gender]").forEach(function(sel){
+      sel.addEventListener("change", function(){
+        var st = cls.students.find(function(s){ return s.id === sel.getAttribute("data-student-gender"); });
+        if(st){ st.gender = sel.value; saveDB(); }
+      });
+    });
+    function refreshExpectedCell(id){
+      var cell = c.querySelector('[data-expected="'+id+'"]');
+      if(cell) cell.innerHTML = '<strong>'+money(studentDue(term, id))+'</strong>';
+    }
+    c.querySelectorAll("[data-open-bal]").forEach(function(inp){
+      inp.addEventListener("input", function(){
+        var id = inp.getAttribute("data-open-bal");
+        term.openingBalances[id] = Number(inp.value) || 0;
+        saveDB(); refreshExpectedCell(id);
+      });
+    });
+    c.querySelectorAll("[data-term-bal]").forEach(function(inp){
+      inp.addEventListener("input", function(){
+        var id = inp.getAttribute("data-term-bal");
+        if(!term.termCharges) term.termCharges = {};
+        term.termCharges[id] = Number(inp.value) || 0;
+        saveDB(); refreshExpectedCell(id);
+      });
+    });
+    c.querySelectorAll("[data-student-name]").forEach(function(inp){
+      inp.addEventListener("change", function(){
+        var id = inp.getAttribute("data-student-name");
+        var st = cls.students.find(function(s){ return s.id === id; });
+        if(st){ st.name = inp.value.trim() || st.name; }
+        saveDB();
+      });
+    });
+    c.querySelectorAll("[data-remove-student]").forEach(function(btn){
+      btn.onclick = function(){
+        var id = btn.getAttribute("data-remove-student");
+        if(!confirm("Remove this student and their payment history from every term in this class?")) return;
+        cls.students = cls.students.filter(function(s){ return s.id !== id; });
+        forgetStudentInTerms(cls, id);
+        saveDB();
+        renderClerkTab();
+      };
+    });
+    c.querySelectorAll("[data-toggle-repeat]").forEach(function(btn){
+      btn.onclick = function(){
+        var id = btn.getAttribute("data-toggle-repeat");
+        var st = cls.students.find(function(s){ return s.id === id; });
+        if(st){ st.repeating = !st.repeating; saveDB(); renderClerkTab(); }
+      };
+    });
+    c.querySelectorAll("[data-transfer-out]").forEach(function(btn){
+      btn.onclick = function(){
+        var id = btn.getAttribute("data-transfer-out");
+        var st = cls.students.find(function(s){ return s.id === id; });
+        if(!st) return;
+        var destination = window.prompt("Which school is " + st.name + " transferring to?");
+        if(destination === null) return;
+        destination = destination.trim();
+        if(!destination) return;
+        if(!confirm("Mark " + st.name + " as transferred to \"" + destination + "\"? They will be removed from this class's active roster.")) return;
+        cls.students = cls.students.filter(function(s){ return s.id !== id; });
+        forgetStudentInTerms(cls, id);
+        cls.transfersOut.push({ id: uid("tr"), name: st.name, destination: destination, date: todayISO() });
+        saveDB();
+        renderClerkTab();
+      };
+    });
+    c.querySelectorAll("[data-move-btn]").forEach(function(btn){
+      btn.onclick = function(){
+        var studentId = btn.getAttribute("data-move-btn");
+        var select = c.querySelector('[data-move-target="'+studentId+'"]');
+        var targetCls = db.classes.find(function(x){ return x.id === select.value; });
+        var st = cls.students.find(function(s){ return s.id === studentId; });
+        if(!targetCls || !st) return;
+        if(!confirm("Move " + st.name + " to " + targetCls.name + "? Their balance will carry forward.")) return;
+        moveStudentToClass(cls, targetCls, studentId);
+        saveDB();
+        renderClerkShell();
+        renderClerkTab();
+      };
+    });
+    c.querySelectorAll("[data-remove-transfer]").forEach(function(btn){
+      btn.onclick = function(){
+        var id = btn.getAttribute("data-remove-transfer");
+        cls.transfersOut = cls.transfersOut.filter(function(t){ return t.id !== id; });
+        saveDB();
+        renderClerkTab();
+      };
+    });
+    var promoteAllBtn = c.querySelector("#promoteAllBtn");
+    if(promoteAllBtn){
+      promoteAllBtn.onclick = function(){
+        var targetId = c.querySelector("#promoteAllTarget").value;
+        var targetCls = db.classes.find(function(x){ return x.id === targetId; });
+        if(!targetCls) return;
+        if(cls.students.length === 0) return;
+        if(!confirm("Promote every learner in " + cls.name + " to " + targetCls.name + "? Balances carry forward for each of them.")) return;
+        var copy = cls.students.slice();
+        copy.forEach(function(st){ moveStudentToClass(cls, targetCls, st.id); });
+        saveDB();
+        renderClerkShell();
+        renderClerkTab();
+      };
+    }
+  }
+
+  /* ---------------- Payments ---------------- */
+
+  function renderPayments(c, cls, term){
+    var html = '<h2 class="section-title">Payments &mdash; '+esc(cls.name)+' &middot; '+esc(term.label)+' '+termYear(term)+'</h2>' +
+      '<p class="section-hint">Record every amount paid, as often as it comes in - daily or monthly. Each student\'s total paid and balance update automatically on the Summary tab. Payments entered by class teachers appear here once they are approved on the Admin tab.</p>';
+
+    if(cls.students.length === 0){
+      html += '<div class="empty-state"><strong>Add students first</strong>Go to the Students tab to add learners before recording payments.</div>';
+      c.innerHTML = html;
+      return;
+    }
+
+    html += '<div class="panel"><div class="row">' +
+      '<div class="field"><label>Student</label><select id="payStudent">' +
+        cls.students.map(function(s){ return '<option value="'+s.id+'">'+esc(s.name)+'</option>'; }).join("") +
+      '</select></div>' +
+      '<div class="field"><label>Date</label><input type="date" id="payDate" value="'+todayISO()+'"></div>' +
+      '<div class="field"><label>Amount</label><input type="number" id="payAmount" placeholder="e.g. 500" style="width:120px"></div>' +
+      '<div class="field"><label>Note (optional)</label><input type="text" id="payNote" placeholder="e.g. Cash, M-Pesa" style="width:160px"></div>' +
+      '<button class="btn" id="addPaymentBtn">Record payment</button>' +
+      '</div></div>';
+
+    var sorted = term.payments.filter(isCounted).sort(function(a,b){ return b.date.localeCompare(a.date); });
+    if(sorted.length === 0){
+      html += '<div class="empty-state"><strong>No payments recorded yet this term</strong>Use the form above to log the first payment.</div>';
+    } else {
+      html += '<div class="panel"><div class="table-wrap"><table><thead><tr><th>Date</th><th>Student</th><th class="num">Amount</th><th>Note</th><th style="width:50px"></th></tr></thead><tbody>';
+      sorted.forEach(function(p){
+        var st = cls.students.find(function(s){ return s.id === p.studentId; });
+        html += '<tr><td>'+esc(p.date)+'</td><td>'+esc(st?st.name:"(removed student)")+'</td>' +
+          '<td class="num">'+money(p.amount)+'</td><td>'+esc(p.note||"")+'</td>' +
+          '<td><button class="icon-x" data-remove-payment="'+p.id+'" title="Delete entry">&times;</button></td></tr>';
+      });
+      html += '</tbody></table></div></div>';
+    }
+
+    c.innerHTML = html;
+
+    c.querySelector("#addPaymentBtn").onclick = function(){
+      var studentId = c.querySelector("#payStudent").value;
+      var date = c.querySelector("#payDate").value || todayISO();
+      var amount = Number(c.querySelector("#payAmount").value);
+      var note = c.querySelector("#payNote").value.trim();
+      if(!studentId || !amount || amount <= 0) return;
+      var entry = { id: uid("pay"), studentId: studentId, date: date, amount: amount, note: note };
+      var direct = directEntryFields();
+      Object.keys(direct).forEach(function(k){ entry[k] = direct[k]; });
+      term.payments.push(entry);
+      saveDB();
+      renderClerkTab();
+    };
+    c.querySelectorAll("[data-remove-payment]").forEach(function(btn){
+      btn.onclick = function(){
+        var id = btn.getAttribute("data-remove-payment");
+        if(!confirm("Delete this payment entry?")) return;
+        term.payments = term.payments.filter(function(p){ return p.id !== id; });
+        saveDB();
+        renderClerkTab();
+      };
+    });
+  }
+
+  /* ---------------- Summary (per class) ---------------- */
+
+  function renderSummary(c, cls, term){
+    var totals = termTotals(cls, term);
+
+    var html = '<h2 class="section-title">Summary &mdash; '+esc(cls.name)+' &middot; '+esc(term.label)+' '+termYear(term)+'</h2>' +
+      '<p class="section-hint">Updates automatically as payments are recorded.</p>';
+
+    html += '<div class="stat-grid">' +
+      '<div class="stat-box"><div class="label">Total expected</div><div class="value">'+money(totals.totalDue)+'</div></div>' +
+      '<div class="stat-box"><div class="label">Total collected</div><div class="value">'+money(totals.totalPaid)+'</div></div>' +
+      '<div class="stat-box"><div class="label">Total balance owing</div><div class="value">'+money(totals.totalBalance)+'</div></div>' +
+      '</div>';
+
+    html += '<div class="toolbar" style="text-align:right;margin-bottom:14px;"><button class="btn secondary" id="downloadBtn">Download class statement (CSV)</button></div>';
+
+    if(cls.students.length === 0){
+      html += '<div class="empty-state"><strong>No students yet</strong>Add learners on the Students tab to see their balances here.</div>';
+    } else {
+      html += '<div class="panel"><h3>Per-student balances</h3><div class="table-wrap"><table><thead><tr>' +
+        '<th>Adm No.</th><th>Student</th><th class="num">Previous term balance</th><th class="num">This term\'s balance</th><th class="num">Expected (total due)</th><th class="num">Paid</th><th class="num">Balance</th></tr></thead><tbody>';
+      cls.students.forEach(function(st){
+        var opening = openingOf(term, st.id);
+        var due = studentDue(term, st.id);
+        var paid = studentPaid(term, st.id);
+        var bal = due - paid;
+        html += '<tr><td>'+esc(st.adm||"")+'</td><td>'+esc(st.name)+'</td>' +
+          '<td class="num">'+money(opening)+'</td>' +
+          '<td class="num">'+money(chargeOf(term, st.id))+'</td>' +
+          '<td class="num">'+money(due)+'</td>' +
+          '<td class="num">'+money(paid)+'</td>' +
+          '<td class="num '+(bal>0?"balance-owing":(bal<0?"balance-clear":""))+'">'+money(bal)+'</td>' +
+          '</tr>';
+      });
+      html += '</tbody></table></div></div>';
+    }
+
+    c.innerHTML = html;
+
+    c.querySelector("#downloadBtn").onclick = function(){
+      downloadClassStatement(cls, term, totals);
+    };
+  }
+
+  function csvCell(v){
+    var s = String(v === undefined || v === null ? "" : v);
+    if(/[",\n]/.test(s)) s = '"' + s.replace(/"/g,'""') + '"';
+    return s;
+  }
+  function downloadCSV(rows, filename){
+    var csv = rows.map(function(r){ return r.map(csvCell).join(","); }).join("\r\n");
+    var blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  function downloadClassStatement(cls, term, totals){
+    var rows = [];
+    rows.push([cls.name + " - " + term.label + " " + termYear(term) + " statement"]);
+    rows.push([]);
+    rows.push(["Adm No.","Student","Gender","Previous term balance","This term's balance","Expected (total due)","Paid","Balance"]);
+    cls.students.forEach(function(st){
+      var opening = openingOf(term, st.id);
+      var due = studentDue(term, st.id);
+      var paid = studentPaid(term, st.id);
+      rows.push([st.adm||"", st.name, st.gender||"", opening.toFixed(2), chargeOf(term, st.id).toFixed(2), due.toFixed(2), paid.toFixed(2), (due-paid).toFixed(2)]);
+    });
+    rows.push([]);
+    rows.push(["Total expected", totals.totalDue.toFixed(2)]);
+    rows.push(["Total collected", totals.totalPaid.toFixed(2)]);
+    rows.push(["Total balance owing", totals.totalBalance.toFixed(2)]);
+    var namePart = (cls.name + "_" + term.label + "_" + termYear(term)).replace(/[^a-z0-9]+/gi,"_").toLowerCase();
+    downloadCSV(rows, namePart + "_statement.csv");
+  }
+
+  /* ---------------- Expenses (whole school) ---------------- */
+
+  function renderExpenses(c){
+    var terms = db.terms.slice().sort(function(a,b){ return (b.year-a.year) || String(b.label).localeCompare(String(a.label)); });
+    var html = '<h2 class="section-title">Remedial Expenses &mdash; whole school</h2>' +
+      '<p class="section-hint">These are remedial-programme expenses for the school as a whole, not tied to a single class, and are kept entirely separate from "Other Collections". Pick a term below and log how the money collected that term is spent.</p>';
+
+    if(terms.length === 0){
+      html += '<div class="empty-state"><strong>No term started yet</strong>Use "Start new term for whole school" above to begin, then come back here to log expenses.</div>';
+      c.innerHTML = html;
+      return;
+    }
+
+    if(!db.activeSchoolTermKey || !terms.some(function(t){ return schoolTermKey(t.label,t.year)===db.activeSchoolTermKey; })){
+      db.activeSchoolTermKey = schoolTermKey(terms[0].label, terms[0].year);
+    }
+    var term = terms.find(function(t){ return schoolTermKey(t.label,t.year)===db.activeSchoolTermKey; });
+
+    html += '<div class="row" style="margin-bottom:16px;"><div class="field"><label>Term</label><select id="expenseTermSelect">' +
+      terms.map(function(t){
+        var key = schoolTermKey(t.label,t.year);
+        return '<option value="'+esc(key)+'"'+(key===db.activeSchoolTermKey?" selected":"")+'>'+esc(t.label)+' '+t.year+'</option>';
+      }).join("") +
+      '</select></div></div>';
+
+    html += '<div class="panel"><div class="row">' +
+      '<div class="field"><label>Date</label><input type="date" id="expDate" value="'+todayISO()+'"></div>' +
+      '<div class="field"><label>Description</label><input type="text" id="expDesc" placeholder="e.g. Photocopying revision papers" style="width:220px"></div>' +
+      '<div class="field"><label>Amount</label><input type="number" id="expAmount" placeholder="e.g. 300" style="width:120px"></div>' +
+      '<button class="btn" id="addExpenseBtn">Record expense</button>' +
+      '</div></div>';
+
+    var expTotal = term.expenses.reduce(function(a,e){ return a+Number(e.amount||0); },0);
+    var sorted = term.expenses.slice().sort(function(a,b){ return b.date.localeCompare(a.date); });
+    html += '<div class="stat-grid"><div class="stat-box"><div class="label">Total spent this term</div><div class="value">'+money(expTotal)+'</div></div></div>';
+
+    if(sorted.length === 0){
+      html += '<div class="empty-state"><strong>No expenses recorded yet this term</strong>Use the form above to log the first one.</div>';
+    } else {
+      html += '<div class="panel"><div class="table-wrap"><table><thead><tr><th>Date</th><th>Description</th><th class="num">Amount</th><th style="width:50px"></th></tr></thead><tbody>';
+      sorted.forEach(function(e){
+        html += '<tr><td>'+esc(e.date)+'</td><td>'+esc(e.description)+'</td>' +
+          '<td class="num">'+money(e.amount)+'</td>' +
+          '<td><button class="icon-x" data-remove-expense="'+e.id+'" title="Delete entry">&times;</button></td></tr>';
+      });
+      html += '</tbody></table></div></div>';
+    }
+
+    c.innerHTML = html;
+
+    c.querySelector("#expenseTermSelect").onchange = function(e){
+      db.activeSchoolTermKey = e.target.value;
+      saveDB();
+      renderClerkTab();
+    };
+    c.querySelector("#addExpenseBtn").onclick = function(){
+      var date = c.querySelector("#expDate").value || todayISO();
+      var desc = c.querySelector("#expDesc").value.trim();
+      var amount = Number(c.querySelector("#expAmount").value);
+      if(!desc || !amount || amount <= 0) return;
+      term.expenses.push({ id: uid("exp"), date: date, description: desc, amount: amount });
+      saveDB();
+      renderClerkTab();
+    };
+    c.querySelectorAll("[data-remove-expense]").forEach(function(btn){
+      btn.onclick = function(){
+        var id = btn.getAttribute("data-remove-expense");
+        if(!confirm("Delete this expense entry?")) return;
+        term.expenses = term.expenses.filter(function(e){ return e.id !== id; });
+        saveDB();
+        renderClerkTab();
+      };
+    });
+  }
+
+  /* ---------------- Teachers ---------------- */
+
+  function renderTeachers(c){
+    var options = allTeacherTermYearOptions();
+    if(!db.activeTeacherFilter && options.length) db.activeTeacherFilter = options[0].term + "||" + options[0].year;
+    var currentYear = new Date().getFullYear();
+
+    var html = '<h2 class="section-title">Teachers</h2>' +
+      '<p class="section-hint">Add teaching staff and record what each one is paid every week. Totals per teacher and the overall amount spent on teachers are shown per term below.</p>';
+
+    if(db.teachers.length === 0){
+      html += '<div class="empty-state"><strong>No teachers added yet</strong>Use the "+ Add teacher" box above the tabs to add your first teacher.</div>';
+      c.innerHTML = html;
+      return;
+    }
+
+    html += '<div class="panel"><h3>Record a weekly payment</h3><div class="row">' +
+      '<div class="field"><label>Teacher</label><select id="tpTeacher">' +
+        db.teachers.map(function(t){ return '<option value="'+t.id+'">'+esc(t.name)+'</option>'; }).join("") +
+      '</select></div>' +
+      '<div class="field"><label>Week ending (date)</label><input type="date" id="tpDate" value="'+todayISO()+'"></div>' +
+      '<div class="field"><label>Term</label><input type="text" id="tpTerm" placeholder="e.g. Term 1" style="width:110px"></div>' +
+      '<div class="field"><label>Year</label><input type="number" id="tpYear" value="'+currentYear+'" style="width:90px"></div>' +
+      '<div class="field"><label>Amount</label><input type="number" id="tpAmount" placeholder="e.g. 1500" style="width:120px"></div>' +
+      '<div class="field"><label>Note (optional)</label><input type="text" id="tpNote" placeholder="e.g. Week 1" style="width:140px"></div>' +
+      '<button class="btn" id="addTeacherPaymentBtn">Record payment</button>' +
+      '</div></div>';
+
+    html += '<div class="panel"><h3>Amount paid per teacher this term</h3>';
+    html += '<div class="row" style="margin-bottom:14px;"><div class="field"><label>Term / Year</label><select id="teacherFilterSelect">' +
+      options.map(function(o){
+        var key = o.term+"||"+o.year;
+        return '<option value="'+esc(key)+'"'+(key===db.activeTeacherFilter?" selected":"")+'>'+esc(o.term)+' '+o.year+'</option>';
+      }).join("") +
+      '</select></div></div>';
+
+    if(options.length === 0){
+      html += '<p class="section-hint" style="margin:0;">No payments recorded yet - use the form above to log the first one.</p>';
+    } else {
+      var parts = (db.activeTeacherFilter||"").split("||");
+      var filterTerm = parts[0], filterYear = parts[1];
+      var grandTotal = 0;
+      html += '<div class="table-wrap"><table><thead><tr><th>Teacher</th><th class="num">Total paid this term</th></tr></thead><tbody>';
+      db.teachers.forEach(function(t){
+        var paid = teacherPaidInTerm(t, filterTerm, filterYear);
+        grandTotal += paid;
+        html += '<tr><td>'+esc(t.name)+'</td><td class="num">'+money(paid)+'</td></tr>';
+      });
+      html += '</tbody></table></div>';
+      html += '<div class="stat-grid" style="margin-top:14px;"><div class="stat-box"><div class="label">Total spent on teachers this term</div><div class="value">'+money(grandTotal)+'</div></div></div>';
+    }
+    html += '</div>';
+
+    html += '<div class="panel"><h3>Full payment log</h3><div class="table-wrap"><table><thead><tr><th>Date</th><th>Teacher</th><th>Term</th><th>Year</th><th class="num">Amount</th><th>Note</th><th style="width:50px"></th></tr></thead><tbody>';
+    var allPayments = [];
+    db.teachers.forEach(function(t){ t.payments.forEach(function(p){ allPayments.push({ p:p, teacher:t }); }); });
+    allPayments.sort(function(a,b){ return b.p.date.localeCompare(a.p.date); });
+    if(allPayments.length === 0){
+      html += '<tr><td colspan="7">No payments recorded yet.</td></tr>';
+    } else {
+      allPayments.forEach(function(item){
+        html += '<tr><td>'+esc(item.p.date)+'</td><td>'+esc(item.teacher.name)+'</td><td>'+esc(item.p.term)+'</td><td>'+esc(item.p.year)+'</td>' +
+          '<td class="num">'+money(item.p.amount)+'</td><td>'+esc(item.p.note||"")+'</td>' +
+          '<td><button class="icon-x" data-remove-teacher-payment="'+item.p.id+'" data-teacher-id="'+item.teacher.id+'" title="Delete entry">&times;</button></td></tr>';
+      });
+    }
+    html += '</tbody></table></div></div>';
+
+    html += '<div class="panel"><h3>Teaching staff</h3><div class="table-wrap"><table><thead><tr><th>Name</th><th class="num">Total paid (all time)</th><th style="width:50px"></th></tr></thead><tbody>';
+    db.teachers.forEach(function(t){
+      html += '<tr><td><input type="text" data-teacher-name="'+t.id+'" value="'+esc(t.name)+'" style="width:100%"></td>' +
+        '<td class="num">'+money(teacherPaidTotal(t))+'</td>' +
+        '<td><button class="icon-x" data-remove-teacher="'+t.id+'" title="Remove teacher">&times;</button></td></tr>';
+    });
+    html += '</tbody></table></div></div>';
+
+    c.innerHTML = html;
+
+    var filterSelect = c.querySelector("#teacherFilterSelect");
+    if(filterSelect){
+      filterSelect.onchange = function(e){ db.activeTeacherFilter = e.target.value; saveDB(); renderClerkTab(); };
+    }
+    c.querySelector("#addTeacherPaymentBtn").onclick = function(){
+      var teacherId = c.querySelector("#tpTeacher").value;
+      var date = c.querySelector("#tpDate").value || todayISO();
+      var term = c.querySelector("#tpTerm").value.trim() || "Term 1";
+      var year = Number(c.querySelector("#tpYear").value) || currentYear;
+      var amount = Number(c.querySelector("#tpAmount").value);
+      var note = c.querySelector("#tpNote").value.trim();
+      if(!teacherId || !amount || amount <= 0) return;
+      var t = db.teachers.find(function(x){ return x.id === teacherId; });
+      if(!t) return;
+      t.payments.push({ id: uid("tpay"), date: date, term: term, year: year, amount: amount, note: note });
+      db.activeTeacherFilter = term + "||" + year;
+      saveDB();
+      renderClerkTab();
+    };
+    c.querySelectorAll("[data-remove-teacher-payment]").forEach(function(btn){
+      btn.onclick = function(){
+        if(!confirm("Delete this teacher payment entry?")) return;
+        var teacherId = btn.getAttribute("data-teacher-id");
+        var payId = btn.getAttribute("data-remove-teacher-payment");
+        var t = db.teachers.find(function(x){ return x.id === teacherId; });
+        if(t) t.payments = t.payments.filter(function(p){ return p.id !== payId; });
+        saveDB();
+        renderClerkTab();
+      };
+    });
+    c.querySelectorAll("[data-teacher-name]").forEach(function(inp){
+      inp.addEventListener("change", function(){
+        var id = inp.getAttribute("data-teacher-name");
+        var t = db.teachers.find(function(x){ return x.id === id; });
+        if(t) t.name = inp.value.trim() || t.name;
+        saveDB();
+        renderClerkTab();
+      });
+    });
+    c.querySelectorAll("[data-remove-teacher]").forEach(function(btn){
+      btn.onclick = function(){
+        if(!confirm("Remove this teacher and their entire payment history?")) return;
+        var id = btn.getAttribute("data-remove-teacher");
+        db.teachers = db.teachers.filter(function(t){ return t.id !== id; });
+        saveDB();
+        renderClerkTab();
+      };
+    });
+  }
+
+  /* ---------------- Year Summary (whole institution) ---------------- */
+
+  function renderYearSummary(c){
+    var years = allYearsInUse();
+    if(!db.activeSummaryYear || years.indexOf(db.activeSummaryYear) === -1) db.activeSummaryYear = years[0];
+    var year = db.activeSummaryYear;
+
+    var html = '<h2 class="section-title">Year Summary &mdash; '+year+'</h2>' +
+      '<p class="section-hint">An automatic, institution-wide view of everything collected, spent, and still owing for the selected year, across every class and every teacher.</p>';
+
+    html += '<div class="row" style="margin-bottom:16px;"><div class="field"><label>Year</label><select id="yearSelect">' +
+      years.map(function(y){ return '<option value="'+y+'"'+(y===year?" selected":"")+'>'+y+'</option>'; }).join("") +
+      '</select></div><button class="btn secondary" id="downloadYearBtn" style="align-self:flex-end;">Download year summary (CSV)</button></div>';
+
+    var classRows = db.classes.map(function(cl){
+      var collected=0, due=0, balance=0;
+      cl.terms.filter(function(t){ return termYear(t) === year; }).forEach(function(t){
+        var totals = termTotals(cl, t);
+        collected += totals.totalPaid; due += totals.totalDue; balance += totals.totalBalance;
+      });
+      return { cls: cl, collected: collected, due: due, balance: balance };
+    });
+    var instTotalCollected = classRows.reduce(function(a,r){return a+r.collected;},0);
+    var instTotalDue = classRows.reduce(function(a,r){return a+r.due;},0);
+    var instTotalBalance = classRows.reduce(function(a,r){return a+r.balance;},0);
+
+    var yearExpenses = [];
+    db.terms.filter(function(t){ return termYear(t) === year; }).forEach(function(t){
+      t.expenses.forEach(function(e){ yearExpenses.push(e); });
+    });
+    var instSchoolExpenses = yearExpenses.reduce(function(a,e){ return a+Number(e.amount||0); },0);
+
+    var teacherRows = db.teachers.map(function(t){
+      var total = t.payments.filter(function(p){ return Number(p.year) === Number(year); }).reduce(function(a,p){ return a+Number(p.amount||0); },0);
+      return { teacher: t, total: total };
+    });
+    var instTeacherTotal = teacherRows.reduce(function(a,r){return a+r.total;},0);
+    var grandExpenditure = instSchoolExpenses + instTeacherTotal;
+
+    html += '<div class="stat-grid">' +
+      '<div class="stat-box"><div class="label">Total collected this year (all classes)</div><div class="value">'+money(instTotalCollected)+'</div></div>' +
+      '<div class="stat-box"><div class="label">Total school expenses</div><div class="value">'+money(instSchoolExpenses)+'</div></div>' +
+      '<div class="stat-box"><div class="label">Total spent on teachers</div><div class="value">'+money(instTeacherTotal)+'</div></div>' +
+      '<div class="stat-box"><div class="label">Total expenditure (institution)</div><div class="value">'+money(grandExpenditure)+'</div></div>' +
+      '<div class="stat-box"><div class="label">Total balance owing (institution)</div><div class="value">'+money(instTotalBalance)+'</div></div>' +
+      '</div>';
+
+    html += '<div class="panel"><h3>Breakdown by class</h3><div class="table-wrap"><table><thead><tr>' +
+      '<th>Class</th><th class="num">Expected</th><th class="num">Collected</th><th class="num">Balance owing</th></tr></thead><tbody>';
+    if(classRows.length === 0){
+      html += '<tr><td colspan="4">No classes yet.</td></tr>';
+    } else {
+      classRows.forEach(function(r){
+        html += '<tr><td>'+esc(r.cls.name)+'</td>' +
+          '<td class="num">'+money(r.due)+'</td>' +
+          '<td class="num">'+money(r.collected)+'</td>' +
+          '<td class="num '+(r.balance>0?"balance-owing":(r.balance<0?"balance-clear":""))+'">'+money(r.balance)+'</td></tr>';
+      });
+      html += '<tr style="font-weight:700;background:var(--bg);"><td>Whole institution</td>' +
+        '<td class="num">'+money(instTotalDue)+'</td>' +
+        '<td class="num">'+money(instTotalCollected)+'</td>' +
+        '<td class="num">'+money(instTotalBalance)+'</td></tr>';
+    }
+    html += '</tbody></table></div></div>';
+
+    html += '<div class="panel"><h3>School expenses this year</h3>';
+    if(yearExpenses.length === 0){
+      html += '<p class="section-hint" style="margin:0;">No expenses recorded for this year.</p>';
+    } else {
+      html += '<div class="table-wrap"><table><thead><tr><th>Date</th><th>Description</th><th class="num">Amount</th></tr></thead><tbody>';
+      yearExpenses.slice().sort(function(a,b){return b.date.localeCompare(a.date);}).forEach(function(e){
+        html += '<tr><td>'+esc(e.date)+'</td><td>'+esc(e.description)+'</td><td class="num">'+money(e.amount)+'</td></tr>';
+      });
+      html += '<tr style="font-weight:700;background:var(--bg);"><td colspan="2">Total school expenses</td><td class="num">'+money(instSchoolExpenses)+'</td></tr>';
+      html += '</tbody></table></div>';
+    }
+    html += '</div>';
+
+    html += '<div class="panel"><h3>Breakdown by teacher</h3><div class="table-wrap"><table><thead><tr><th>Teacher</th><th class="num">Total paid this year</th></tr></thead><tbody>';
+    if(teacherRows.length === 0){
+      html += '<tr><td colspan="2">No teachers yet.</td></tr>';
+    } else {
+      teacherRows.forEach(function(r){ html += '<tr><td>'+esc(r.teacher.name)+'</td><td class="num">'+money(r.total)+'</td></tr>'; });
+      html += '<tr style="font-weight:700;background:var(--bg);"><td>Total spent on teachers</td><td class="num">'+money(instTeacherTotal)+'</td></tr>';
+    }
+    html += '</tbody></table></div></div>';
+
+    c.innerHTML = html;
+
+    c.querySelector("#yearSelect").onchange = function(e){ db.activeSummaryYear = Number(e.target.value); saveDB(); renderClerkTab(); };
+    c.querySelector("#downloadYearBtn").onclick = function(){
+      var rows = [];
+      rows.push(["Year Summary - " + year]);
+      rows.push([]);
+      rows.push(["Class","Expected","Collected","Balance owing"]);
+      classRows.forEach(function(r){ rows.push([r.cls.name, r.due.toFixed(2), r.collected.toFixed(2), r.balance.toFixed(2)]); });
+      rows.push(["Whole institution", instTotalDue.toFixed(2), instTotalCollected.toFixed(2), instTotalBalance.toFixed(2)]);
+      rows.push([]);
+      rows.push(["School expenses","",""]);
+      yearExpenses.forEach(function(e){ rows.push([e.date, e.description, Number(e.amount).toFixed(2)]); });
+      rows.push(["Total school expenses", "", instSchoolExpenses.toFixed(2)]);
+      rows.push([]);
+      rows.push(["Teacher","Total paid this year"]);
+      teacherRows.forEach(function(r){ rows.push([r.teacher.name, r.total.toFixed(2)]); });
+      rows.push(["Total spent on teachers", instTeacherTotal.toFixed(2)]);
+      rows.push([]);
+      rows.push(["Total expenditure (institution)", grandExpenditure.toFixed(2)]);
+      rows.push(["Total balance owing (institution)", instTotalBalance.toFixed(2)]);
+      downloadCSV(rows, "institution_year_summary_" + year + ".csv");
+    };
+  }
+
+  /* ---------------- Admin: approvals, who entered / who accepted, accounts ---------------- */
+
+  function fmtStamp(iso){ return iso ? new Date(iso).toLocaleString() : "-"; }
+
+  function collectPaymentItems(){
+    var items = [];
+    db.classes.forEach(function(cl){
+      cl.terms.forEach(function(t){
+        t.payments.forEach(function(p){
+          var st = cl.students.find(function(s){ return s.id === p.studentId; });
+          items.push({ p: p, type: cl.name + " - " + t.label + " " + termYear(t), who: st ? st.name : "(removed student)" });
+        });
+      });
+    });
+    return items;
+  }
+  function ledgerPendingCount(data){
+    var n = 0;
+    (data.classes || []).forEach(function(cl){ cl.terms.forEach(function(t){ t.payments.forEach(function(p){ if(p.status === "pending") n++; }); }); });
+    return n;
+  }
+  function pendingItems(){
+    return collectPaymentItems().filter(function(i){ return i.p.status === "pending"; });
+  }
+  function markDecision(p, approve){
+    var a = currentActor();
+    p.status = approve ? "approved" : "rejected";
+    p.decidedBy = a.name; p.decidedRole = a.role; p.decidedAt = new Date().toISOString();
+  }
+  function acceptedByText(p){
+    if(p.direct) return "Entered directly (no approval needed)";
+    if(p.status === "pending") return "Awaiting approval";
+    if(!p.decidedBy) return "-";
+    return (p.status === "rejected" ? "Rejected by " : "") + whoText(p.decidedBy, p.decidedRole) + " on " + fmtStamp(p.decidedAt);
+  }
+  function statusHtml(p){
+    if(p.status === "pending") return '<span class="tag" style="margin-left:0;">Pending</span>';
+    if(p.status === "rejected") return '<span class="balance-owing">Rejected</span>';
+    return '<span class="balance-clear">Approved</span>';
+  }
+
+  function bindApprovals(c, pending, refresh){
+    c.querySelectorAll("[data-approve]").forEach(function(btn){
+      btn.onclick = function(){
+        var it = pending[Number(btn.getAttribute("data-approve"))];
+        if(!it) return;
+        markDecision(it.p, true);
+        addMessage(sdata(), actorLabel(), "Approved " + money(it.p.amount) + " for " + it.who + " (" + it.type + ") dated " + it.p.date + ", entered by " + (it.p.enteredBy || "unknown") + ".");
+        refresh();
+      };
+    });
+    c.querySelectorAll("[data-reject]").forEach(function(btn){
+      btn.onclick = function(){
+        var it = pending[Number(btn.getAttribute("data-reject"))];
+        if(!it) return;
+        if(!confirm("Reject this payment? It will not be added to the account.")) return;
+        markDecision(it.p, false);
+        addMessage(sdata(), actorLabel(), "Rejected " + money(it.p.amount) + " for " + it.who + " (" + it.type + ") dated " + it.p.date + ", entered by " + (it.p.enteredBy || "unknown") + ".");
+        refresh();
+      };
+    });
+    var approveAllBtn = c.querySelector("#approveAllBtn");
+    if(approveAllBtn){
+      approveAllBtn.onclick = function(){
+        if(!confirm("Approve all " + pending.length + " payments awaiting approval?")) return;
+        var total = 0;
+        pending.forEach(function(it){ markDecision(it.p, true); total += Number(it.p.amount||0); });
+        addMessage(sdata(), actorLabel(), "Approved " + pending.length + " payment(s) totalling " + money(total) + ".");
+        refresh();
+      };
+    }
+  }
+
+  function renderAdmin(c){
+    var school = currentSchool();
+    var items = collectPaymentItems();
+    var pending = items.filter(function(i){ return i.p.status === "pending"; })
+      .sort(function(a,b){ return String(a.p.enteredAt || a.p.date).localeCompare(String(b.p.enteredAt || b.p.date)); });
+
+    var html = '<h2 class="section-title">Admin'+(currentSection === "collections" && getCurrentCollection() ? ' &mdash; ' + esc(getCurrentCollection().name) : '')+'</h2>' +
+      '<p class="section-hint">Approve or reject payments before they are added to the account, see who entered and who accepted each one, and manage the clerk and school admin accounts. This list shows only the ledger you are in; every collection keeps its own.</p>';
+
+    html += '<div class="panel"><h3>Payments awaiting approval</h3>';
+    if(pending.length === 0){
+      html += '<p class="section-hint" style="margin:0;">Nothing is waiting for approval.</p>';
+    } else {
+      html += '<p class="section-hint" style="margin:0 0 10px;">These amounts are not counted in any balance or total until they are approved.</p>' +
+        '<div style="text-align:right;margin-bottom:10px;"><button class="btn" id="approveAllBtn">Approve all ('+pending.length+')</button></div>' +
+        '<div class="table-wrap"><table><thead><tr><th>Payment date</th><th>For</th><th>Student / From</th><th class="num">Amount</th><th>Entered by</th><th>Entered on</th><th style="width:180px;"></th></tr></thead><tbody>';
+      pending.forEach(function(it, i){
+        html += '<tr><td>'+esc(it.p.date)+'</td><td>'+esc(it.type)+'</td><td>'+esc(it.who)+'</td><td class="num">'+money(it.p.amount)+'</td>' +
+          '<td>'+esc(whoText(it.p.enteredBy, it.p.enteredRole))+'</td><td>'+esc(fmtStamp(it.p.enteredAt))+'</td>' +
+          '<td><button class="btn" data-approve="'+i+'" style="padding:5px 10px;">Approve</button> <button class="btn danger" data-reject="'+i+'" style="padding:5px 10px;">Reject</button></td></tr>';
+      });
+      html += '</tbody></table></div>';
+    }
+    html += '</div>';
+
+    var records = items.slice().sort(function(a,b){ return String(b.p.enteredAt || b.p.date).localeCompare(String(a.p.enteredAt || a.p.date)); });
+    html += '<div class="panel"><h3>Remedial fee payment records - who entered and who accepted</h3>';
+    if(records.length === 0){
+      html += '<p class="section-hint" style="margin:0;">No payments recorded yet.</p>';
+    } else {
+      html += '<div class="table-wrap"><table><thead><tr><th>Entered on</th><th>Payment date</th><th>For</th><th>Student / From</th><th class="num">Amount</th><th>Status</th><th>Entered by</th><th>Accepted by</th></tr></thead><tbody>';
+      records.slice(0, 300).forEach(function(it){
+        var p = it.p;
+        html += '<tr><td>'+esc(fmtStamp(p.enteredAt))+'</td><td>'+esc(p.date)+'</td><td>'+esc(it.type)+'</td><td>'+esc(it.who)+'</td>' +
+          '<td class="num">'+money(p.amount)+'</td><td>'+statusHtml(p)+'</td>' +
+          '<td>'+esc(whoText(p.enteredBy, p.enteredRole))+'</td><td>'+esc(acceptedByText(p))+'</td></tr>';
+      });
+      html += '</tbody></table></div>';
+      if(records.length > 300) html += '<p class="section-hint" style="margin:10px 0 0;">Showing the most recent 300 of '+records.length+' payments.</p>';
+    }
+    html += '</div>';
+
+    var canEdit = session.role === "schooladmin" || !(school.adminUsername && school.adminPassword);
+    html += '<div class="panel"><h3>School accounts</h3>' +
+      '<p class="section-hint" style="margin:0 0 10px;">Each school has a clerk account and a school admin account. Both can approve payments.' + (canEdit ? '' : ' Only the school admin can change these details.') + '</p>' +
+      '<div class="table-wrap"><table><thead><tr><th>Account</th><th>Username</th><th>Password</th></tr></thead><tbody>';
+    if(canEdit){
+      html += '<tr><td>Clerk</td><td><input type="text" id="acctClerkUser" value="'+esc(school.clerkUsername)+'" style="width:100%"></td>' +
+        '<td><input type="text" id="acctClerkPass" value="'+esc(school.clerkPassword)+'" style="width:100%"></td></tr>' +
+        '<tr><td>School Admin</td><td><input type="text" id="acctAdminUser" value="'+esc(school.adminUsername||"")+'" placeholder="set admin username" style="width:100%"></td>' +
+        '<td><input type="text" id="acctAdminPass" value="'+esc(school.adminPassword||"")+'" placeholder="set admin password" style="width:100%"></td></tr>';
+    } else {
+      html += '<tr><td>Clerk</td><td>'+esc(school.clerkUsername)+'</td><td>&bull;&bull;&bull;&bull;&bull;&bull;</td></tr>' +
+        '<tr><td>School Admin</td><td>'+esc(school.adminUsername)+'</td><td>&bull;&bull;&bull;&bull;&bull;&bull;</td></tr>';
+    }
+    html += '</tbody></table></div></div>';
+
+    c.innerHTML = html;
+
+    function refresh(){ saveDB(); renderClerkShell(); renderClerkTab(); }
+    bindApprovals(c, pending, refresh);
+
+    if(canEdit){
+      c.querySelector("#acctClerkUser").addEventListener("change", function(e){
+        var val = e.target.value.trim();
+        if(!val){ e.target.value = school.clerkUsername; return; }
+        if(isUsernameTaken(val, school, "clerk")){ alert("That username is already in use."); e.target.value = school.clerkUsername; return; }
+        school.clerkUsername = val; refresh();
+      });
+      c.querySelector("#acctClerkPass").addEventListener("change", function(e){
+        school.clerkPassword = e.target.value || school.clerkPassword; saveDB();
+      });
+      c.querySelector("#acctAdminUser").addEventListener("change", function(e){
+        var val = e.target.value.trim();
+        if(!val){ e.target.value = school.adminUsername || ""; return; }
+        if(isUsernameTaken(val, school, "admin")){ alert("That username is already in use."); e.target.value = school.adminUsername || ""; return; }
+        school.adminUsername = val; refresh();
+      });
+      c.querySelector("#acctAdminPass").addEventListener("change", function(e){
+        school.adminPassword = e.target.value || school.adminPassword || ""; saveDB();
+      });
+    }
+  }
+
+  /* ---------------- Boot ---------------- */
+
+  function boot(){
+    loadSession();
+    if(!session.token || !isConfigured()){ renderLogin(isConfigured() ? "" : "This app is not connected to its online database yet. Add the Supabase URL and key in the file."); return; }
+    document.getElementById("loginScreen").style.display = "block";
+    document.getElementById("loginScreen").innerHTML = '<div class="login-wrap"><div class="login-card"><h1 class="login-title">Ledger Fees</h1><p class="section-hint">Loading your records...</p></div></div>';
+    rpc("lf_load", { p_token: session.token }).then(function(info){
+      applyLoaded(info);
+      if(info.role !== "superadmin"){
+        session.schoolId = info.school_id || null; session.classId = info.class_id || null;
+        session.ledgerId = info.ledger_id || null; session.memberId = info.member_id || null;
+      }
+      var validClerk = (session.role === "clerk" || session.role === "schooladmin") && currentSchool();
+      var validTeacher = session.role === "classteacher" && currentSchool() && !!findClassEntry(currentSchool(), session.classId);
+      var validCommittee = session.role === "committee" && currentSchool() && !!findCommitteeMember(currentSchool(), session.ledgerId, session.memberId);
+      if(session.role === "superadmin" || validClerk || validTeacher || validCommittee){ startApp(); offerLocalImport(); }
+      else { session = { role:null, schoolId:null, classId:null }; saveSession(); renderLogin(); }
+    }).catch(function(e){
+      var m = String((e && e.message) || "");
+      if(m.indexOf("SESSION_EXPIRED") >= 0){ session = { role:null, schoolId:null, classId:null }; saveSession(); renderLogin("Your session has expired. Please sign in again."); }
+      else { renderLogin("Could not connect. Check your internet connection and reload."); }
+    });
+  }
+  boot();
+})();
+</script>
+<script>
+if("serviceWorker" in navigator){
+  window.addEventListener("load", function(){
+    navigator.serviceWorker.register("sw.js").catch(function(e){ console.warn("SW failed", e); });
+  });
+}
+</script>
+</body>
+</html>
